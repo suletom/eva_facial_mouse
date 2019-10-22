@@ -23,7 +23,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.View;
 
 import com.crea_si.eviacam.common.InputMethodAction;
@@ -35,7 +35,7 @@ import org.codepond.wizardroid.layouts.BasicWizardLayout;
 public class SetupWizard extends BasicWizardLayout {
     /**
      * Note that initially BasicWizardLayout inherits from
-     * {@link android.support.v4.app.Fragment}
+     * {@link androidx.core.app.Fragment}
      * and therefore you must have an empty constructor
      */
     public SetupWizard() {

@@ -18,7 +18,7 @@
  */
 package com.crea_si.eviacam.slavemode;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.crea_si.eviacam.api.IDockPanelEventListener;
 import com.crea_si.eviacam.api.IGamepadEventListener;

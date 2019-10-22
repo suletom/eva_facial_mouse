@@ -20,8 +20,8 @@ package com.crea_si.eviacam.a11yservice;
 
 import android.content.Context;
 import android.graphics.Point;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.view.View;
 import android.widget.RelativeLayout;
 

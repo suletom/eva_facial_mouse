@@ -19,7 +19,7 @@
 package com.crea_si.eviacam.common;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.IOException;

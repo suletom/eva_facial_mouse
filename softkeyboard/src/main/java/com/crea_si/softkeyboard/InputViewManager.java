@@ -23,7 +23,7 @@ import android.inputmethodservice.KeyboardView;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;

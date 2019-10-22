@@ -22,7 +22,7 @@ package com.crea_si.eviacam.common;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.PointF;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.lang.Math;
 

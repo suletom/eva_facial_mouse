@@ -23,7 +23,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;

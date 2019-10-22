@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
 
     defaultConfig {
         applicationId "com.crea_si.eviacam.api_demo"
-        minSdkVersion 14
-        targetSdkVersion 22
+        minSdkVersion 19
+        targetSdkVersion 29
     }
 
     // TODO
@@ -24,5 +24,5 @@ android {
 }
 
 dependencies {
-    compile project(':eviacam_api')
+    implementation project(':eviacam_api')
 }

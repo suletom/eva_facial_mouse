@@ -24,7 +24,7 @@ import com.crea_si.eviacam.common.MouseEmulation;
 import android.accessibilityservice.AccessibilityService;
 import android.app.Service;
 import android.graphics.PointF;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.accessibility.AccessibilityEvent;
 
 /**

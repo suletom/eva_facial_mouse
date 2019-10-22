@@ -19,7 +19,7 @@
 
 package com.crea_si.eviacam.a11yservice;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.crea_si.eviacam.common.Engine;

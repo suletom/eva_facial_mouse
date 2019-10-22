@@ -29,7 +29,7 @@ import com.crea_si.eviacam.common.PointerLayerView;
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
