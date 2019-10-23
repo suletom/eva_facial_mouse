@@ -2,9 +2,13 @@
 forked from cmauri/eva_facial_mouse
 EVA Facial Mouse is released under GNU/GPL v3.0
 
+
 # Compile with Following libs
+
 OpenCV-android-sdk_2.4.13.6
+
 space-station/WizarDroid (migrated to androidx)
+
 
 ## Requirements
 
@@ -14,6 +18,7 @@ space-station/WizarDroid (migrated to androidx)
 * Dual-core processor or higher
 
 See the [list of devices tested with EVA](https://docs.google.com/spreadsheets/d/1gxuIKbw92d9USPT_SvM0iCdWjtnVcx7owJAgwM6Za6w/).
+
 
 ## Limitations
 
