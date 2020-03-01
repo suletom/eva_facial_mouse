@@ -23,8 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
-
-import com.crea_si.eviacam.common.EVIACAM;
+import android.util.Log;
 
 /**
  * Power management stuff
@@ -33,6 +32,8 @@ public class PowerManagement extends BroadcastReceiver {
     interface OnScreenStateChangeListener {
         void onOnScreenStateChange ();
     }
+
+    private static final String TAG = "PowerManagement";
 
     private final Context mContext;
 
@@ -76,11 +77,14 @@ public class PowerManagement extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(EVIACAM.TAG+"->"+TAG,"BroadcastReciever OnRecive");
+
         if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             mScreenOn = false;
-
+            Log.d(EVIACAM.TAG+"->"+TAG,"Intent.ACTION_SCREEN_OFF");
         } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
             mScreenOn = true;
+            Log.d(EVIACAM.TAG+"->"+TAG,"Intent.ACTION_SCREEN_ON");
         }
         if (mOnScreenStateChangeListener != null) {
             mOnScreenStateChangeListener.onOnScreenStateChange();

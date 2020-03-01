@@ -19,37 +19,40 @@
 
 package com.crea_si.eviacam.a11yservice;
 
-import java.util.ArrayList;
-import java.util.List;
+ import android.accessibilityservice.AccessibilityService;
+ import android.accessibilityservice.AccessibilityServiceInfo;
+ import android.accessibilityservice.GestureDescription;
+ import android.annotation.TargetApi;
+ import android.app.AlertDialog;
+ import android.content.Context;
+ import android.content.DialogInterface;
+ import android.content.SharedPreferences;
+ import android.graphics.Path;
+ import android.graphics.Point;
+ import android.graphics.Rect;
+ import android.os.Build;
+ import android.os.Handler;
+ import android.util.Log;
+ import android.view.View;
+ import android.view.WindowManager;
+ import android.view.accessibility.AccessibilityEvent;
+ import android.view.accessibility.AccessibilityNodeInfo;
+ import android.view.accessibility.AccessibilityWindowInfo;
+ import android.widget.CheckBox;
+ import android.widget.CompoundButton;
 
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.os.Build;
-import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import android.util.Log;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityWindowInfo;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+ import androidx.annotation.NonNull;
+ import androidx.annotation.Nullable;
 
-import com.crea_si.eviacam.BuildConfig;
-import com.crea_si.eviacam.common.DockPanelLayerView;
-import com.crea_si.eviacam.common.EVIACAM;
-import com.crea_si.eviacam.R;
-import com.crea_si.eviacam.common.InputMethodAction;
-import com.crea_si.eviacam.common.Preferences;
-import com.crea_si.eviacam.util.AccessibilityNodeDebug;
+ import com.crea_si.eviacam.R;
+ import com.crea_si.eviacam.common.DockPanelLayerView;
+ import com.crea_si.eviacam.common.EVIACAM;
+ import com.crea_si.eviacam.common.InputMethodAction;
+ import com.crea_si.eviacam.common.Preferences;
+ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
+
+ import java.util.ArrayList;
+ import java.util.List;
 
  /**
   * Manages actions relative to the Android accessibility API
@@ -62,8 +65,11 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
 
     // delay after which an accessibility event is processed
     private static final long SCROLLING_SCAN_RUN_DELAY= 700;
-    
-    /**
+
+    private static final String TAG = "AccessibilityAction";
+
+
+     /**
      * Class to put together an accessibility action 
      * and the label to display to the user 
      */
@@ -137,6 +143,10 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
     // navigation keyboard advice shown?
     private boolean mNavigationKeyboardAdviceShown= false;
 
+    private boolean mSwipe= false;
+    private boolean mZoom= false;
+    private boolean mZoomo= false;
+
     AccessibilityAction (@NonNull AccessibilityService as, @NonNull ContextMenuLayerView cv,
                          @NonNull DockPanelLayerView dplv, @NonNull ScrollLayerView slv) {
         mAccessibilityService= as;
@@ -168,6 +178,31 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
         }
     }
 
+    boolean getSwipe(){
+        Boolean b = mSwipe;
+        mSwipe=false;
+
+        return b;
+    }
+
+    boolean getZoom(){
+        Boolean b = mZoom;
+        mZoom=false;
+        return b;
+    }
+
+    boolean getZoomo(){
+         Boolean b = mZoomo;
+         mZoomo=false;
+         return b;
+    }
+
+     boolean getAction(){
+
+         if (mSwipe || mZoom || mZoomo) return true;
+         return false;
+     }
+
     @NonNull
     private Context getContext() {
         return mContextMenuLayerView.getContext();
@@ -184,7 +219,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
     void disableScrollingScan() { mScrollingScanEnabled= false; }
 
     /** Manages global actions, return false if action not generated */
-    private boolean manageGlobalActions (@NonNull Point p) {
+    private boolean manageGlobalActions (@NonNull Point p,boolean generated) {
         /*
          * Is the action for the dock panel?
          */
@@ -192,7 +227,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
         if (idDockPanelAction == View.NO_ID) return false;
 
         /*  Process action by the view */
-        mDockPanelLayerView.performClick(idDockPanelAction);
+        mDockPanelLayerView.performClick(idDockPanelAction,generated);
 
         /*
          * Process action here
@@ -235,7 +270,29 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
                 EVIACAM.ShortToast(getContext(), R.string.service_toast_rest_mode_disabled);
             }
             break;
-        }
+
+        case R.id.swipe_button:
+
+                EVIACAM.ShortToast(getContext(), R.string.swipe_on);
+                mSwipe=true;
+
+            break;
+
+        case R.id.zoom_button:
+
+                EVIACAM.ShortToast(getContext(), R.string.zoom_plus_on);
+                mZoom=true;
+
+            break;
+
+        case R.id.zoomo_button:
+
+                 EVIACAM.ShortToast(getContext(),R.string.zoom_minus_on);
+                 mZoomo=true;
+
+            break;
+
+    }
         
         return true;
     }
@@ -314,18 +371,94 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
      * if the node below the pointer is actually actionable.
      */
     boolean isActionable(@NonNull Point p) {
-        if (!mDockPanelLayerView.getRestModeEnabled()) return true;
 
-        /* In rest mode check for active areas of the Dock Menu */
-        return mDockPanelLayerView.isActionable(p);
+        SharedPreferences sp = Preferences.get().getSharedPreferences();
+        // get values from shared resources
+        Boolean enableclick = sp.getBoolean(Preferences.KEY_ENABLE_DWELL, false);
+
+        if (enableclick) {
+
+            if (!mDockPanelLayerView.getRestModeEnabled()) return true;
+            /* In rest mode check for active areas of the Dock Menu */
+            return mDockPanelLayerView.isActionable(p);
+
+        } else {
+
+            return mDockPanelLayerView.isActionable(p);
+        }
     }
+
+    void performSwipe (@NonNull Point pInt,@NonNull Point pInt2) {
+
+        final int DURATION = 800;
+
+        Path clickPath = new Path();
+        clickPath.moveTo(pInt2.x, pInt2.y);
+        clickPath.lineTo(pInt.x, pInt.y);
+
+        GestureDescription.StrokeDescription clickStroke = new GestureDescription.StrokeDescription(clickPath, 0, DURATION);
+
+
+        GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
+
+        clickBuilder.addStroke(clickStroke);
+
+        GestureDescription gd = clickBuilder.build();
+
+        Boolean b = mAccessibilityService.dispatchGesture(gd,null,null);
+
+    }
+
+     void performZoom (@NonNull Point pInt,@NonNull Point pInt2, boolean in) {
+
+         final int DURATION = 800;
+
+         Point mp = new Point();
+         mp.x=pInt.x+(pInt2.x-pInt.x)/2;
+         mp.y=pInt.y+(pInt2.y-pInt.y)/2;
+
+         Path clickPath = new Path();
+         Path clickPath1 = new Path();
+
+         if (in) {
+
+             clickPath.moveTo(mp.x, mp.y);
+             clickPath.lineTo(pInt.x, pInt.y);
+
+             clickPath1.moveTo(mp.x, mp.y);
+             clickPath1.lineTo(pInt2.x, pInt2.y);
+
+         }else{
+
+             clickPath.moveTo(pInt.x, pInt.y);
+             clickPath.lineTo(mp.x, mp.y);
+
+             clickPath1.moveTo(pInt2.x, pInt2.y);
+             clickPath1.lineTo(mp.x, mp.y);
+         }
+
+         GestureDescription.StrokeDescription clickStroke = new GestureDescription.StrokeDescription(clickPath, 0, DURATION);
+         GestureDescription.StrokeDescription clickStroke1 = new GestureDescription.StrokeDescription(clickPath1, 0, DURATION);
+
+         GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
+
+         clickBuilder.addStroke(clickStroke);
+         clickBuilder.addStroke(clickStroke1);
+
+         GestureDescription gd = clickBuilder.build();
+
+         Boolean b = mAccessibilityService.dispatchGesture(gd,null,null);
+
+
+     }
 
     /**
      * Performs action (click) on a specific location of the screen
      * 
      * @param pInt - point in screen coordinates
+     * @param generated - Hardware source click
      */
-    void performAction(@NonNull Point pInt) {
+    void performAction(@NonNull Point pInt,boolean generated) {
         if (mContextMenuOpen && !mContextMenuHelpOpen) {
             /* When context menu open only check it */
             int action= mContextMenuLayerView.testClick(pInt);
@@ -335,7 +468,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
         }
         else {
             // Manages clicks on global actions menu
-            if (manageGlobalActions(pInt)) return;
+            if (manageGlobalActions(pInt,generated)) return;
             
             // Manages clicks for scrolling buttons
             if (manageScrollActions(pInt)) return;
@@ -406,6 +539,25 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
                 if (mInputMethodAction.click(pInt.x, pInt.y)) return;
             }
 
+
+            if (Preferences.get().getClickKey()>0){
+                Path clickPath = new Path();
+                clickPath.moveTo(pInt.x, pInt.y);
+
+                GestureDescription.StrokeDescription clickStroke = new GestureDescription.StrokeDescription(clickPath, 0, 50);
+
+                GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
+
+                clickBuilder.addStroke(clickStroke);
+
+                GestureDescription gd = clickBuilder.build();
+
+                Boolean b = mAccessibilityService.dispatchGesture(gd,null,null);
+                return;
+            }
+
+
+
             /* Manages actions on an arbitrary position of the screen  */
 
             // Finds node under (x, y) and its available actions
@@ -413,7 +565,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
 
             if (node == null) return;
 
-            if (BuildConfig.DEBUG) Log.d(EVIACAM.TAG, "Actionable node found: (" + pInt.x + ", " +
+            Log.d(EVIACAM.TAG+"->"+TAG, "Actionable node found: (" + pInt.x + ", " +
                     pInt.y + ")." + AccessibilityNodeDebug.getNodeInfo(node));
 
             int availableActions= FULL_ACTION_MASK & node.getActions();
@@ -485,7 +637,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
         AlertDialog ad = builder.create();
 
         //noinspection ConstantConditions
-        ad.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         ad.show();
     }
 
@@ -519,7 +671,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
                     EVIACAM.LongToast(getContext(), R.string.service_toast_navigation_keyboard_advice);
                     mNavigationKeyboardAdviceShown= true;
                 }
-                if (BuildConfig.DEBUG) Log.d(EVIACAM.TAG, "Scroll areas refresh done. Found:" +
+                Log.d(EVIACAM.TAG+"->"+TAG, "Scroll areas refresh done. Found:" +
                         scrollableNodes.size());
                 for (AccessibilityNodeInfo n : scrollableNodes) {
                     mScrollLayerView.addScrollArea(n);
@@ -576,7 +728,7 @@ import com.crea_si.eviacam.util.AccessibilityNodeDebug;
             break;
 
         default:
-            if (BuildConfig.DEBUG) Log.d(EVIACAM.TAG, "UNKNOWN EVENT: IGNORED");
+            Log.d(EVIACAM.TAG+"->"+TAG, "UNKNOWN EVENT: IGNORED");
             return;
         }
 

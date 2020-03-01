@@ -20,6 +20,7 @@
 package com.crea_si.eviacam.a11yservice;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -28,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
@@ -57,6 +59,8 @@ class ServiceNotification {
     private final BroadcastReceiver mBroadcastReceiver;
 
     private int mAction= NOTIFICATION_ACTION_NONE;
+
+    private  static String CHANNEL_ID = "CH";
 
     private boolean mInitDone = false;
 
@@ -106,6 +110,15 @@ class ServiceNotification {
         Notification noti = createNotification(mService, mAction);
         NotificationManager notificationManager =
                 (NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        CharSequence name = "chname";
+        String description = CHANNEL_ID;
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+
+        notificationManager.createNotificationChannel(channel);
+
         notificationManager.notify(NOTIFICATION_ID, noti);
 
         // Register as foreground service
@@ -157,7 +170,10 @@ class ServiceNotification {
         }
         else throw new IllegalStateException();
 
+
+
         NotificationCompat.Builder builder= new NotificationCompat.Builder(c)
+            .setChannelId(CHANNEL_ID)
             .setSmallIcon(iconId)
             .setLargeIcon(BitmapFactory.decodeResource(c.getResources(), R.drawable.ic_launcher))
             .setContentTitle(c.getText(R.string.app_name))

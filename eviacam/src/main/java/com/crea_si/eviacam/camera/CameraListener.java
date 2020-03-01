@@ -19,29 +19,33 @@
 
 package com.crea_si.eviacam.camera;
 
+import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
+import android.util.Log;
+import android.view.SurfaceView;
+
+import androidx.annotation.NonNull;
+
+import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.common.EVIACAM;
+import com.crea_si.eviacam.util.FlipDirection;
+
 import org.acra.ACRA;
 import org.opencv.android.CameraException;
 import org.opencv.android.MyCameraBridgeViewBase;
 import org.opencv.android.MyCameraBridgeViewBase.CvCameraViewFrame;
-import org.opencv.android.MyJavaCameraView;
 import org.opencv.android.MyCameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.android.MyJavaCameraView;
 import org.opencv.core.Mat;
-
-import android.content.Context;
-import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
-import androidx.annotation.NonNull;
-import android.util.Log;
-import android.view.SurfaceView;
-
-import com.crea_si.eviacam.common.EVIACAM;
-import com.crea_si.eviacam.R;
-import com.crea_si.eviacam.util.FlipDirection;
 
 /**
  * Provides a simple camera interface for initializing, starting and stopping it.
  */
 class CameraListener implements CvCameraViewListener2 {
+
+    private static final String TAG = "CameraListener";
+
     // callback to process frames
     private final FrameProcessor mFrameProcessor;
     
@@ -95,7 +99,7 @@ class CameraListener implements CvCameraViewListener2 {
          */
         final int numCameras= Camera.getNumberOfCameras();
         if (numCameras< 1) {
-            Log.e(EVIACAM.TAG, "No cameras available");
+            Log.e(EVIACAM.TAG+"->"+TAG, "No cameras available");
             throw new CameraException(CameraException.NO_CAMERAS_AVAILABLE,
                     c.getResources().getString(R.string.service_camera_no_available));
         }
@@ -121,10 +125,10 @@ class CameraListener implements CvCameraViewListener2 {
             flip= FlipDirection.VERTICAL;
             cameraId= MyCameraBridgeViewBase.CAMERA_ID_BACK;
 
-            Log.i(EVIACAM.TAG, "Back camera detected. Orientation: " + cameraInfo.orientation);
+            Log.d(EVIACAM.TAG, "Back camera detected. Orientation: " + cameraInfo.orientation);
         }
         else {
-            Log.i(EVIACAM.TAG, "Front camera detected. Orientation: " + cameraInfo.orientation);
+            Log.d(EVIACAM.TAG, "Front camera detected. Orientation: " + cameraInfo.orientation);
         }
 
         mCameraOrientation= cameraInfo.orientation;
@@ -146,8 +150,13 @@ class CameraListener implements CvCameraViewListener2 {
         //mCameraView.enableFpsMeter();  // remove comment for testing
 
         mCameraView.setVisibility(SurfaceView.VISIBLE);
+
+
+
     }
-    
+
+
+
     void startCamera() {
         // start camera capture
         try {
@@ -164,7 +173,7 @@ class CameraListener implements CvCameraViewListener2 {
         }
         catch (Exception error) {
             // Ignore errors when stopping camera
-            Log.e(EVIACAM.TAG, error.getLocalizedMessage());
+            Log.e(EVIACAM.TAG+"->"+TAG, error.getLocalizedMessage());
             ACRA.getErrorReporter().handleSilentException(error);
         }
     }
@@ -201,20 +210,27 @@ class CameraListener implements CvCameraViewListener2 {
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        Log.i(EVIACAM.TAG, "onCameraViewStarted");
+        Log.d(EVIACAM.TAG, "onCameraViewStarted");
         mFrameProcessor.onCameraStarted();
     }
 
     @Override
     public void onCameraViewStopped() {
-        Log.i(EVIACAM.TAG, "onCameraViewStopped. Frame count:" + mCapuredFrames);
+        Log.d(EVIACAM.TAG, "onCameraViewStopped. Frame count:" + mCapuredFrames);
 
         mFrameProcessor.onCameraStopped();
     }
 
     @Override
     public void onCameraViewError(@NonNull Throwable error) {
-        mFrameProcessor.onCameraError(error);
+        Log.w(EVIACAM.TAG, "onCameraViewError: "+error.toString());
+        mFrameProcessor.onCameraErrorStopped();
+    }
+
+
+    public void onCameraStopped() {
+        Log.w(EVIACAM.TAG, "onCameraStopped -> onCameraErrorStopped");
+        mFrameProcessor.onCameraErrorStopped();
     }
 
     /**
@@ -226,7 +242,7 @@ class CameraListener implements CvCameraViewListener2 {
         mCapuredFrames++;
         if (mCapuredFrames< 100) {
             if ((mCapuredFrames % 10) == 0) {
-                Log.i(EVIACAM.TAG, "onCameraFrame. Frame count:" + mCapuredFrames);
+                Log.d(EVIACAM.TAG, "onCameraFrame. Frame count:" + mCapuredFrames);
             }
         }
 

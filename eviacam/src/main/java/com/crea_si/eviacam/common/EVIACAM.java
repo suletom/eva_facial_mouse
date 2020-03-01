@@ -22,11 +22,12 @@ package com.crea_si.eviacam.common;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import com.crea_si.eviacam.BuildConfig;
 import com.crea_si.eviacam.util.HeartBeat;
@@ -149,7 +150,7 @@ public class EVIACAM {
      */
     private static void setCurrentProcess() {
         String processName= getCurrentProcessName();
-        Log.i(EVIACAM.TAG, "Current process:" + processName);
+        Log.d(EVIACAM.TAG, "Current process:" + processName);
 
         if (processName== null) return;
 

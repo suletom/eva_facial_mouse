@@ -18,14 +18,15 @@
  */
 package com.crea_si.eviacam.a11yservice;
 
-import com.crea_si.eviacam.common.CoreEngine;
-import com.crea_si.eviacam.common.MouseEmulation;
-
 import android.accessibilityservice.AccessibilityService;
 import android.app.Service;
 import android.graphics.PointF;
-import androidx.annotation.NonNull;
 import android.view.accessibility.AccessibilityEvent;
+
+import androidx.annotation.NonNull;
+
+import com.crea_si.eviacam.common.CoreEngine;
+import com.crea_si.eviacam.common.MouseEmulation;
 
 /**
  * Engine implementation for the accessibility service which provides
@@ -171,4 +172,6 @@ public class AccessibilityServiceModeEngineImpl extends CoreEngine
             mClickDispatcher.onAccessibilityEvent(event);
         }
     }
+
+
 }

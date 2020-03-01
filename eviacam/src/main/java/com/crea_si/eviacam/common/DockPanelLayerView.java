@@ -28,8 +28,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import android.preference.PreferenceManager;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,6 +41,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.util.ViewUtils;
@@ -150,18 +152,22 @@ public class DockPanelLayerView extends RelativeLayout
  
         switch (gravity) {
         case Gravity.END:
+            //Log.d(EVIACAM.TAG, "OverlayView: gravity: END");
             container.setOrientation(LinearLayout.HORIZONTAL);
             lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             // no break
         case Gravity.START:
+            //Log.d(EVIACAM.TAG, "OverlayView: gravity: START");
             lp.addRule(RelativeLayout.CENTER_VERTICAL);
             break;
         case Gravity.TOP:
+            //Log.d(EVIACAM.TAG, "OverlayView: gravity: TOP");
             container.setOrientation(LinearLayout.VERTICAL);
             lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
             lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
             break;
         case Gravity.BOTTOM:
+            //Log.d(EVIACAM.TAG, "OverlayView: gravity: BOTTOM");
             container.setOrientation(LinearLayout.VERTICAL);
             lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -377,22 +383,39 @@ public class DockPanelLayerView extends RelativeLayout
      * Gives an opportunity to process a click action for a given view
      *  
      * @param id - ID of the view on which to make click
+     * @param hwgenerated Indicate HW click as source
      *
      * Remarks: called from a secondary thread
      */
-    public void performClick (final int id) {
+    public void performClick (final int id, final boolean hwgenerated) {
         if (id == R.id.expand_collapse_dock_button) {
             this.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (mIsExpanded) collapse();
-                    else {
-                        expand();
-                        if (mRestModeEnabled) {
-                            mRestModeEnabled = false;
-                            updateToggleButtons ();
-                            setRestModeAppearance();
+
+                    SharedPreferences sp=  Preferences.get().getSharedPreferences();
+                    // get values from shared resources
+                    Boolean enableclick = sp.getBoolean(Preferences.KEY_ENABLE_DWELL, false);
+
+                    if (!enableclick && !hwgenerated) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean(Preferences.KEY_ENABLE_DWELL, true);
+                        editor.apply();
+
+                        EVIACAM.LongToast(getContext(), R.string.service_toast_dwell_click_turned_on);
+
+                    } else {
+                        if (mIsExpanded) collapse();
+                        else {
+                            expand();
+                            if (mRestModeEnabled) {
+                                mRestModeEnabled = false;
+                                updateToggleButtons();
+                                setRestModeAppearance();
+                            }
                         }
+
                     }
                 }
             });
@@ -466,10 +489,25 @@ public class DockPanelLayerView extends RelativeLayout
      * In rest mode, only a specific button in the dock panel works
      */
     public boolean isActionable(@NonNull Point p) {
-        if (!mRestModeEnabled) return true;
-        int id= getViewIdBelowPoint(p);
 
-        return id == R.id.toggle_rest_mode || id == R.id.expand_collapse_dock_button;
+        SharedPreferences sp=  Preferences.get().getSharedPreferences();
+        // get values from shared resources
+        Boolean enableclick= sp.getBoolean(Preferences.KEY_ENABLE_DWELL,false);
+        //Log.d(EVIACAM.TAG+"->", "isActionable:"+String.valueOf(enableclick));
+        int id = getViewIdBelowPoint(p);
+
+        if (enableclick) {
+
+            if (!mRestModeEnabled) return true;
+
+            return id == R.id.toggle_rest_mode || id == R.id.expand_collapse_dock_button;
+        }else{
+
+            if (id == R.id.expand_collapse_dock_button){
+                return true;
+            }
+            return false;
+        }
     }
 
     /**

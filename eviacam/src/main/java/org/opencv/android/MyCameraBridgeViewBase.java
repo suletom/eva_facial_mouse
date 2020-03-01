@@ -1,10 +1,5 @@
 package org.opencv.android;
 
-import java.util.List;
-
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -12,13 +7,18 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.common.EVIACAM;
+
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+
+import java.util.List;
 
 /**
  * This is a basic class, implementing the interaction with Camera and OpenCV library.
@@ -73,7 +73,7 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
         super(context, attrs);
 
         int count = attrs.getAttributeCount();
-        Log.d(TAG, "Attr count: " + Integer.valueOf(count));
+        Log.d(EVIACAM.TAG+"->"+TAG, "Attr count: " + Integer.valueOf(count));
 
         TypedArray styledAttrs = getContext().obtainStyledAttributes(attrs, R.styleable.CameraBridgeViewBase);
         if (styledAttrs.getBoolean(R.styleable.CameraBridgeViewBase_show_fps, false))
@@ -130,6 +130,8 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
          * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
          */
         public Mat onCameraFrame(Mat inputFrame);
+
+        void onCameraStopped();
     }
 
     public interface CvCameraViewListener2 {
@@ -159,6 +161,10 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
          * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
          */
         Mat onCameraFrame(CvCameraViewFrame inputFrame);
+
+        /** handle disconnnected camera */
+        void onCameraStopped();
+
     };
 
     protected class CvCameraViewListenerAdapter implements CvCameraViewListener2  {
@@ -179,6 +185,10 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
             mOldStyleListener.onCameraViewError(error);
         }
 
+        public void onCameraStopped() {
+            mOldStyleListener.onCameraStopped();
+        }
+
         public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
              Mat result = null;
              switch (mPreviewFormat) {
@@ -189,7 +199,7 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
                     result = mOldStyleListener.onCameraFrame(inputFrame.gray());
                     break;
                 default:
-                    Log.e(TAG, "Invalid frame format! Only RGBA and Gray Scale are supported!");
+                    Log.e(EVIACAM.TAG+"->"+TAG, "Invalid frame format! Only RGBA and Gray Scale are supported!");
             };
 
             return result;
@@ -221,7 +231,7 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
     };
 
     public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
-        Log.d(TAG, "call surfaceChanged event");
+        Log.d(EVIACAM.TAG+"->"+TAG, "call surfaceChanged event");
         synchronized(mSyncObject) {
             try {
                 if (!mSurfaceExist) {
@@ -238,7 +248,7 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
                 }
             }
             catch (Exception e) {
-                Log.e(TAG, "surfaceChanged exception: " + e.getLocalizedMessage());
+                Log.e(EVIACAM.TAG+"->"+TAG, "surfaceChanged exception: " + e.getLocalizedMessage());
                 if (mListener!= null) {
                     mListener.onCameraViewError(e);
                 }
@@ -258,7 +268,7 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
                 checkCurrentState();
             }
             catch(Exception e) {
-                Log.e(TAG, "surfaceDestroyed exception: " + e.getLocalizedMessage());
+                Log.e(EVIACAM.TAG+"->"+TAG, "surfaceDestroyed exception: " + e.getLocalizedMessage());
                 if (mListener!= null) {
                     mListener.onCameraViewError(e);
                 }
@@ -471,9 +481,9 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
             try {
                 Utils.matToBitmap(modified, mCacheBitmap);
             } catch(Exception e) {
-                Log.e(TAG, "Mat type: " + modified);
-                Log.e(TAG, "Bitmap type: " + mCacheBitmap.getWidth() + "*" + mCacheBitmap.getHeight());
-                Log.e(TAG, "Utils.matToBitmap() throws an exception: " + e.getMessage());
+                Log.e(EVIACAM.TAG+"->"+TAG, "Mat type: " + modified);
+                Log.e(EVIACAM.TAG+"->"+TAG, "Bitmap type: " + mCacheBitmap.getWidth() + "*" + mCacheBitmap.getHeight());
+                Log.e(EVIACAM.TAG+"->"+TAG, "Utils.matToBitmap() throws an exception: " + e.getMessage());
                 bmpValid = false;
             }
         }
@@ -601,5 +611,9 @@ public abstract class MyCameraBridgeViewBase extends SurfaceView implements Surf
      */
     public void setUpdateViewer(boolean v) {
         mUpdateViewer = v;
+    }
+
+    protected void dispatchCameraStopped(){
+        mListener.onCameraStopped();
     }
 }

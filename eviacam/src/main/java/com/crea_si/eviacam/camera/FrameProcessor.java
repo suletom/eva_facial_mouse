@@ -20,7 +20,6 @@
 package com.crea_si.eviacam.camera;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.opencv.core.Mat;
 
@@ -43,6 +42,11 @@ public interface FrameProcessor {
      * Called when the camera is stopped
      */
     void onCameraStopped();
+
+    /**
+     * Called when the camera is stopped during capturing
+     */
+    void onCameraErrorStopped();
 
     /**
      * Called when the camera initialization failed

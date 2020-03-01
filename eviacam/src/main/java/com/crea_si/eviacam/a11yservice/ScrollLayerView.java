@@ -19,35 +19,37 @@
 
 package com.crea_si.eviacam.a11yservice;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.ImageView.ScaleType;
+import android.widget.RelativeLayout;
 
-import com.crea_si.eviacam.BuildConfig;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.Preferences;
-import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.util.ViewUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Layer to draw scrolling buttons
  */
 public class ScrollLayerView extends RelativeLayout implements OnSharedPreferenceChangeListener {
+
+    private static final String TAG = "ScrollLayerView";
     
     class NodeAction {
         AccessibilityNodeInfo node;
@@ -180,7 +182,7 @@ public class ScrollLayerView extends RelativeLayout implements OnSharedPreferenc
     
     /** Set the position of a button */
     private void setButtonPosition(@NonNull ImageButton b, int x, int y) {
-        if (BuildConfig.DEBUG) Log.d(EVIACAM.TAG, "Scroll button (" + x + ", " + y + ")");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Scroll button (" + x + ", " + y + ")");
         RelativeLayout.LayoutParams rlp= (RelativeLayout.LayoutParams) b.getLayoutParams();
         rlp.leftMargin = x;
         rlp.topMargin = y;

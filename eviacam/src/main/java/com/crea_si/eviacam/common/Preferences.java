@@ -48,6 +48,10 @@ public class Preferences {
     public static final String KEY_DWELL_TIME= "dwell_time";
     public static final String KEY_DWELL_AREA= "dwell_area";
     public static final String KEY_SOUND_ON_CLICK= "sound_on_click";
+    public static final String KEY_ENABLE_DWELL= "enable_dwell";
+    public static final String KEY_KEY_BLOCK= "key_block";
+    public static final String KEY_KEY_CLICK= "key_click";
+    public static final String KEY_KEYPRESS_TIME= "external_keypress_time";
     public static final String KEY_CONSECUTIVE_CLICKS = "consecutive_clicks";
     public static final String KEY_DOCKING_PANEL_EDGE= "docking_panel_edge";
     public static final String KEY_UI_ELEMENTS_SIZE= "ui_elements_size";
@@ -89,6 +93,13 @@ public class Preferences {
     private final int MOTION_THRESHOLD_MIN;
     private final int MOTION_THRESHOLD_MAX;
     private final boolean SOUND_ON_CLICK_DEFAULT;
+    private final boolean ENABLE_DWELL_DEFAULT;
+    private final boolean KEY_BLOCK_DEFAULT;
+    private final int KEY_CLICK_DEFAULT;
+    private final int KEYPRESS_TIME_DEFAULT;
+    private final int KEYPRESS_TIME_MIN;
+    private final int KEYPRESS_TIME_MAX;
+
     private String[] TIME_WITHOUT_DETECTION_ENTRIES;
     private String[] TIME_WITHOUT_DETECTION_VALUES;
 
@@ -128,6 +139,12 @@ public class Preferences {
         MOTION_THRESHOLD_MIN= r.getInteger(R.integer.motion_threshold_min);
         MOTION_THRESHOLD_MAX= r.getInteger(R.integer.motion_threshold_max);
         SOUND_ON_CLICK_DEFAULT= r.getBoolean(R.bool.sound_on_click_default);
+        ENABLE_DWELL_DEFAULT = r.getBoolean(R.bool.enable_dwell_default);
+        KEY_BLOCK_DEFAULT = r.getBoolean(R.bool.key_block_default);
+        KEY_CLICK_DEFAULT = r.getInteger(R.integer.key_click_default);
+        KEYPRESS_TIME_DEFAULT = r.getInteger(R.integer.external_keypress_time_default);
+        KEYPRESS_TIME_MIN = r.getInteger(R.integer.external_keypress_time_min);
+        KEYPRESS_TIME_MAX = r.getInteger(R.integer.external_keypress_time_max);
 
         TIME_WITHOUT_DETECTION_VALUES= r.getStringArray(R.array.time_without_detection_values);
         TIME_WITHOUT_DETECTION_ENTRIES= r.getStringArray(R.array.time_without_detection_entries);
@@ -140,7 +157,7 @@ public class Preferences {
     public void cleanup() {
         if (mInitCount> 0) {
             if (--mInitCount == 0) {
-                Log.i(EVIACAM.TAG, "Preferences: cleanup");
+                Log.d(EVIACAM.TAG, "Preferences: cleanup");
                 sInstance= null;
             }
         }
@@ -165,7 +182,7 @@ public class Preferences {
             if (sInstance.mInitMode != INIT_A11Y) return null;
         }
         else {
-            Log.i(EVIACAM.TAG, "Preferences: initForA11yService");
+            Log.d(EVIACAM.TAG, "Preferences: initForA11yService");
 
             // As accessibility service use the default preferences
             PreferenceManager.setDefaultValues(c, R.xml.preference_fragment, true);
@@ -190,7 +207,7 @@ public class Preferences {
             if (sInstance.mInitMode != INIT_SLAVE_MODE) return null;
         }
         else {
-            Log.i(EVIACAM.TAG, "Preferences: initForSlaveService");
+            Log.d(EVIACAM.TAG, "Preferences: initForSlaveService");
 
             // Slave mode preferences. We first load default default
             // preferences and then update with slave mode ones
@@ -293,6 +310,23 @@ public class Preferences {
         return mSharedPreferences.getBoolean(
                 Preferences.KEY_SOUND_ON_CLICK, SOUND_ON_CLICK_DEFAULT);
     }
+
+    public boolean getEnableBlockKey() {
+        return mSharedPreferences.getBoolean(
+                Preferences.KEY_KEY_BLOCK, KEY_BLOCK_DEFAULT);
+    }
+
+    public int getClickKey() {
+        return mSharedPreferences.getInt(
+                Preferences.KEY_KEY_CLICK, KEY_CLICK_DEFAULT);
+    }
+
+
+    public int getKeypressTime() {
+        int v= mSharedPreferences.getInt(Preferences.KEY_KEYPRESS_TIME, KEYPRESS_TIME_DEFAULT);
+        return constraint (v,KEYPRESS_TIME_MIN, KEYPRESS_TIME_MAX);
+    }
+
 
     public float getUIElementsSize() {
         return Float.parseFloat(mSharedPreferences.getString(KEY_UI_ELEMENTS_SIZE, null));
@@ -406,5 +440,7 @@ public class Preferences {
         spe.putBoolean(Preferences.KEY_SHOW_CONTEXT_MENU_HELP, v);
         spe.apply();
     }
+
+
  }
  

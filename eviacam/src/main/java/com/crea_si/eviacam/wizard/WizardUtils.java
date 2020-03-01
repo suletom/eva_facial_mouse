@@ -24,13 +24,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.crea_si.eviacam.BuildConfig;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.crea_si.eviacam.EngineSelector;
 import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.a11yservice.AccessibilityServiceModeEngine;
-import com.crea_si.eviacam.EngineSelector;
 import com.crea_si.eviacam.common.EVIACAM;
 
 public class WizardUtils {
@@ -47,6 +47,7 @@ public class WizardUtils {
         AccessibilityServiceModeEngine engine= EngineSelector.getAccessibilityServiceModeEngine();
         if (engine!= null && engine.isReady()) {
             engine.enableAll();
+            Log.d(EVIACAM.TAG+"->WizardUtils", "fullStartEngine");
             engine.start();
 
             // Notify AccessibilityServiceModeEngineImpl the wizard has finished
@@ -56,7 +57,7 @@ public class WizardUtils {
     }
 
     static AccessibilityServiceModeEngine checkEngineAndFinishIfNeeded (final Activity a) {
-        if (BuildConfig.DEBUG) Log.d(EVIACAM.TAG, "checkEngineAndFinishIfNeeded");
+        Log.d(EVIACAM.TAG+"->WizardUtils", "checkEngineAndFinishIfNeeded");
 
         if (a== null) {
             // This means the activity does not exists anymore

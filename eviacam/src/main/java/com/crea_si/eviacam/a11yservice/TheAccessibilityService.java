@@ -27,17 +27,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import android.content.res.Configuration;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.crea_si.eviacam.BuildConfig;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.crea_si.eviacam.EngineSelector;
 import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.common.Analytics;
 import com.crea_si.eviacam.common.CrashRegister;
+import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.Engine;
 import com.crea_si.eviacam.common.Preferences;
 import com.crea_si.eviacam.wizard.WizardUtils;
@@ -63,6 +66,8 @@ public class TheAccessibilityService extends AccessibilityService
     // reference to the notification management stuff
     private ServiceNotification mServiceNotification;
 
+    private boolean mBlockAllKey = false;
+
     // Receiver listener for the service notification
     private final BroadcastReceiver mServiceNotificationReceiver = new BroadcastReceiver() {
         @Override
@@ -86,14 +91,52 @@ public class TheAccessibilityService extends AccessibilityService
                             })
                    .create();
                 //noinspection ConstantConditions
-                ad.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                 ad.show();
             } else if (action == ServiceNotification.NOTIFICATION_ACTION_START) {
                 initEngine();
             } else {
                 // ignore intent
-                Log.i(TAG, "mServiceNotificationReceiver: Got unknown intent");
+                Log.d(EVIACAM.TAG+"->"+TAG, "mServiceNotificationReceiver: Got unknown intent");
             }
+        }
+    };
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        if (newConfig.orientation==Configuration.ORIENTATION_PORTRAIT) {
+
+
+            Intent intent = new Intent("orientation");
+            intent.putExtra("dir", 0);
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        }else{
+
+
+            Intent intent = new Intent("orientation");
+            intent.putExtra("dir", 1);
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+
+
+
+        super.onConfigurationChanged(newConfig);
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+           Boolean kc = intent.getBooleanExtra("enable",false);
+           if (kc){
+               mBlockAllKey=true;
+           }else{
+               mBlockAllKey=false;
+           }
         }
     };
 
@@ -112,7 +155,7 @@ public class TheAccessibilityService extends AccessibilityService
          * called-when-running-on-emulator
          */
         if (mServiceStarted) {
-            Log.w(TAG, "Accessibility service already running! Stop here.");
+            Log.w(EVIACAM.TAG+"->"+TAG, "Accessibility service already running! Stop here.");
             ACRA.getErrorReporter().handleException(new IllegalStateException(
                     "Accessibility service already running! Stop here."), true);
             return;
@@ -135,7 +178,7 @@ public class TheAccessibilityService extends AccessibilityService
          * The user will need to enable it again through the notification icon.
          */
         if (CrashRegister.crashedRecently(this)) {
-            Log.w(TAG, "Recent crash detected. Aborting initialization.");
+            Log.w(EVIACAM.TAG+"->"+TAG, "Recent crash detected. Aborting initialization.");
             CrashRegister.clearCrash(this);
             mServiceNotification.update(ServiceNotification.NOTIFICATION_ACTION_START);
             return;
@@ -149,6 +192,9 @@ public class TheAccessibilityService extends AccessibilityService
             mServiceNotification.update(ServiceNotification.NOTIFICATION_ACTION_START);
             return;
         }
+
+        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
+                mMessageReceiver, new IntentFilter("BlockAllKey"));
 
         initEngine();
     }
@@ -178,7 +224,7 @@ public class TheAccessibilityService extends AccessibilityService
      */
     private void initEngine() {
         if (null != mEngine) {
-            Log.i(TAG, "Engine already initialized. Ignoring.");
+            Log.d(EVIACAM.TAG+"->"+TAG, "Engine already initialized. Ignoring.");
             return;
         }
 
@@ -188,7 +234,7 @@ public class TheAccessibilityService extends AccessibilityService
         /* Init the main engine */
         mEngine = EngineSelector.initAccessibilityServiceModeEngine();
         if (mEngine == null) {
-            Log.e(TAG, "Cannot initialize CoreEngine in A11Y mode");
+            Log.e(EVIACAM.TAG+"->"+TAG, "Cannot initialize CoreEngine in A11Y mode");
         } else {
             mEngine.init(this, this);
         }
@@ -205,10 +251,25 @@ public class TheAccessibilityService extends AccessibilityService
         }
         else {
             // Initialization failed
-            Log.e(TAG, "Cannot initialize CoreEngine in A11Y mode");
+            Log.e(EVIACAM.TAG+"->"+TAG, "Cannot initialize CoreEngine in A11Y mode");
             cleanupEngine();
             mServiceNotification.update(ServiceNotification.NOTIFICATION_ACTION_START);
         }
+    }
+
+    public void stop() {
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "Stop everything");
+        cleanupEngine();
+        Preferences.get().setEngineWasRunning(false);
+
+    }
+
+    public void restart() {
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "Start everything");
+        initEngine();
+
     }
 
     /**
@@ -231,6 +292,7 @@ public class TheAccessibilityService extends AccessibilityService
             this.startActivity(dialogIntent);
         }
         else {
+            Log.d(EVIACAM.TAG+"->"+TAG, "initEnginePhase2 - engine.start()");
             mEngine.start();
         }
         mServiceNotification.update(ServiceNotification.NOTIFICATION_ACTION_STOP);
@@ -243,6 +305,7 @@ public class TheAccessibilityService extends AccessibilityService
         @Override
         public void onReceive(Context context, Intent intent) {
             if (mEngine!= null) {
+                Log.d(EVIACAM.TAG+"->"+TAG, "mFinishWizardReceiver - engine.start()");
                 mEngine.start();
                 mServiceNotification.update(ServiceNotification.NOTIFICATION_ACTION_STOP);
             }
@@ -288,7 +351,7 @@ public class TheAccessibilityService extends AccessibilityService
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onCreate");
+        Log.d(EVIACAM.TAG+"->"+TAG, "onCreate");
     }
 
     /**
@@ -296,7 +359,7 @@ public class TheAccessibilityService extends AccessibilityService
      */
     @Override
     public void onServiceConnected() {
-        Log.i(TAG, "onServiceConnected");
+        Log.d(EVIACAM.TAG+"->"+TAG, "onServiceConnected");
         init();
     }
 
@@ -309,7 +372,7 @@ public class TheAccessibilityService extends AccessibilityService
          * which might be related with the spurious crashes when switching
          * off the accessibility service. Tested on Nexus 7 Android 5.1.1
          */
-        if (BuildConfig.DEBUG) Log.d(TAG, "onUnbind");
+        Log.d(EVIACAM.TAG+"->"+TAG, "onUnbind");
         cleanup();
         return false;
     }
@@ -320,7 +383,7 @@ public class TheAccessibilityService extends AccessibilityService
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (BuildConfig.DEBUG) Log.d(TAG, "onDestroy");
+        Log.d(EVIACAM.TAG+"->"+TAG, "onDestroy");
         cleanup();
     }
 
@@ -344,6 +407,34 @@ public class TheAccessibilityService extends AccessibilityService
      */
     @Override
     public void onInterrupt() {
-        if (BuildConfig.DEBUG) Log.d(TAG, "onInterrupt");
+        Log.d(EVIACAM.TAG+"->"+TAG, "onInterrupt");
     }
+
+
+    @Override
+    protected boolean onKeyEvent(KeyEvent event) {
+
+            Log.d(EVIACAM.TAG+"->"+TAG, "key event:" + event.getKeyCode()+" type:"+event.getAction());
+            Intent intent = new Intent("KeyEvent");
+            // You can also include some extra data.
+            intent.putExtra("keycode", event.getKeyCode());
+            intent.putExtra("keyaction", event.getAction());
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "getenablekeyblock:"+String.valueOf(Preferences.get().getEnableBlockKey()));
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "getclickkey:"+String.valueOf(Preferences.get().getClickKey()));
+
+        if ((Preferences.get().getEnableBlockKey() && Preferences.get().getClickKey()==event.getKeyCode()) || mBlockAllKey ){
+
+            Log.d(EVIACAM.TAG+"->"+TAG, "key event:blocked");
+            return true;
+        }else {
+            Log.d(EVIACAM.TAG+"->"+TAG, "key event:notblocked");
+            return super.onKeyEvent(event);
+        }
+    }
+
+
 }

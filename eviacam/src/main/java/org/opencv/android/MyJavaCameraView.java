@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.common.EVIACAM;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -70,29 +71,29 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
     }
 
     protected void initializeCamera(int width, int height) throws CameraException {
-        Log.d(TAG, "Initialize java camera");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Initialize java camera");
 
         synchronized (this) {
             mCamera = null;
 
             if (mCameraIndex == CAMERA_ID_ANY) {
-                Log.d(TAG, "Trying to open camera with old open()");
+                Log.d(EVIACAM.TAG+"->"+TAG, "Trying to open camera with old open()");
                 try {
                     mCamera = Camera.open();
                 }
                 catch (Exception e){
-                    Log.e(TAG, "Camera is not available (in use or does not exist): " + e.getLocalizedMessage());
+                    Log.e(EVIACAM.TAG+"->"+TAG, "Camera is not available (in use or does not exist): " + e.getLocalizedMessage());
                 }
 
                 if(mCamera == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
                     boolean connected = false;
                     for (int camIdx = 0; camIdx < Camera.getNumberOfCameras(); ++camIdx) {
-                        Log.d(TAG, "Trying to open camera with new open(" + Integer.valueOf(camIdx) + ")");
+                        Log.d(EVIACAM.TAG+"->"+TAG, "Trying to open camera with new open(" + Integer.valueOf(camIdx) + ")");
                         try {
                             mCamera = Camera.open(camIdx);
                             connected = true;
                         } catch (RuntimeException e) {
-                            Log.e(TAG, "Camera #" + camIdx + "failed to open: " + e.getLocalizedMessage());
+                            Log.e(EVIACAM.TAG+"->"+TAG, "Camera #" + camIdx + "failed to open: " + e.getLocalizedMessage());
                         }
                         if (connected) break;
                     }
@@ -101,7 +102,7 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
                     int localCameraIndex = mCameraIndex;
                     if (mCameraIndex == CAMERA_ID_BACK) {
-                        Log.i(TAG, "Trying to open back camera");
+                        Log.d(EVIACAM.TAG+"->"+TAG, "Trying to open back camera");
                         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
                         for (int camIdx = 0; camIdx < Camera.getNumberOfCameras(); ++camIdx) {
                             Camera.getCameraInfo( camIdx, cameraInfo );
@@ -111,7 +112,7 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                             }
                         }
                     } else if (mCameraIndex == CAMERA_ID_FRONT) {
-                        Log.i(TAG, "Trying to open front camera");
+                        Log.d(EVIACAM.TAG+"->"+TAG, "Trying to open front camera");
                         Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
                         for (int camIdx = 0; camIdx < Camera.getNumberOfCameras(); ++camIdx) {
                             Camera.getCameraInfo( camIdx, cameraInfo );
@@ -122,17 +123,17 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                         }
                     }
                     if (localCameraIndex == CAMERA_ID_BACK) {
-                        Log.e(TAG, "Back camera not found!");
+                        Log.e(EVIACAM.TAG+"->"+TAG, "Back camera not found!");
                         throw new CameraException(CameraException.CAMERA_ERROR, "Back camera not found!");
                     } else if (localCameraIndex == CAMERA_ID_FRONT) {
-                        Log.e(TAG, "Front camera not found!");
+                        Log.e(EVIACAM.TAG+"->"+TAG, "Front camera not found!");
                         throw new CameraException(CameraException.CAMERA_ERROR, "Front camera not found!");
                     } else {
-                        Log.d(TAG, "Trying to open camera with new open(" + Integer.valueOf(localCameraIndex) + ")");
+                        Log.d(EVIACAM.TAG+"->"+TAG, "Trying to open camera with new open(" + Integer.valueOf(localCameraIndex) + ")");
                         try {
                             mCamera = Camera.open(localCameraIndex);
                         } catch (RuntimeException e) {
-                            Log.e(TAG, "Camera #" + localCameraIndex + "failed to open: " + e.getLocalizedMessage());
+                            Log.e(EVIACAM.TAG+"->"+TAG, "Camera #" + localCameraIndex + "failed to open: " + e.getLocalizedMessage());
                         }
                     }
                 }
@@ -143,20 +144,27 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                 DevicePolicyManager dpm = (DevicePolicyManager)
                         getContext().getSystemService(Context.DEVICE_POLICY_SERVICE);
                 if (dpm.getCameraDisabled(null)) {
-                    Log.e(TAG, "The device's cameras have been disabled for this user");
+                    Log.e(EVIACAM.TAG+"->"+TAG, "The device's cameras have been disabled for this user");
                     throw new CameraException(CameraException.CAMERA_DISABLED,
                             getResources().getString(R.string.service_camera_disabled_error));
                 }
 
                 /* Otherwise the camera is already in use */
-                Log.e(TAG, "Camera already in use");
+                Log.e(EVIACAM.TAG+"->"+TAG, "Camera already in use");
                 throw new CameraException(CameraException.CAMERA_IN_USE,
                         getResources().getString(R.string.service_camera_no_access));
             }
 
+            mCamera.setErrorCallback(new Camera.ErrorCallback(){
+                public void onError(int e, Camera c){
+                    Log.e(EVIACAM.TAG+"->"+TAG, "Camera1device.onError");
+                    dispatchCameraStopped();
+                }
+            });
+
             /* Now set camera parameters */
             Camera.Parameters params = mCamera.getParameters();
-            Log.d(TAG, params.flatten());
+            Log.d(EVIACAM.TAG+"->"+TAG, params.flatten());
 
             List<android.hardware.Camera.Size> sizes = params.getSupportedPreviewSizes();
 
@@ -164,7 +172,7 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                 /* Select the size that fits surface considering maximum size allowed */
                 Size frameSize = calculateBestCameraFrameSize(sizes, new JavaCameraSizeAccessor(), mMaxWidth, mMaxHeight);
 
-                Log.d(TAG, "Set preview size to " + Integer.valueOf((int)frameSize.width) +
+                Log.d(EVIACAM.TAG+"->"+TAG, "Set preview size to " + Integer.valueOf((int)frameSize.width) +
                         "x" + Integer.valueOf((int)frameSize.height));
 
                 params.setPreviewFormat(ImageFormat.NV21);
@@ -204,7 +212,7 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                  * Samsung Galaxy Nexus: (15000,15000),(15000,30000),(24000,30000)
                  */
                 List<int[]> ranges= params.getSupportedPreviewFpsRange ();
-                Log.d(TAG, ranges.toString());
+                Log.d(EVIACAM.TAG+"->"+TAG, ranges.toString());
 
                 int winner= ranges.size()-1;
                 int maxLimit= ranges.get(ranges.size()-1)[1];
@@ -260,24 +268,24 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                         mCamera.setPreviewDisplay(null);
                 }
                 catch (java.io.IOException e) {
-                    Log.e(TAG, "setPreviewTexture failed with an IOException");
+                    Log.e(EVIACAM.TAG+"->"+TAG, "setPreviewTexture failed with an IOException");
                     throw new CameraException(CameraException.CAMERA_ERROR,
                             "IO error while settings camera parameters", e);
                 }
 
                 /* Finally we are ready to start the preview */
-                Log.d(TAG, "startPreview");
+                Log.d(EVIACAM.TAG+"->"+TAG, "startPreview");
                 try {
                     mCamera.startPreview();
                 }
                 catch (RuntimeException e) {
-                    Log.e(TAG, "startPreview failed with a RuntimeException");
+                    Log.e(EVIACAM.TAG+"->"+TAG, "startPreview failed with a RuntimeException");
                     throw new CameraException(CameraException.CAMERA_ERROR,
                             getResources().getString(R.string.service_camera_error), e);
                 }
             }
             else {
-                Log.e(TAG, "Cannot retrieve sizes");
+                Log.e(EVIACAM.TAG+"->"+TAG, "Cannot retrieve sizes");
                 throw new CameraException(CameraException.CAMERA_ERROR,
                         "Camera error: cannot retrieve sizes");
             }
@@ -313,13 +321,13 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
          * 2. We need to start thread which will be getting frames
          */
         /* First step - initialize camera connection */
-        Log.d(TAG, "Connecting to camera");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Connecting to camera");
         initializeCamera(width, height);
 
         mCameraFrameReady = false;
 
         /* now we can start update thread */
-        Log.d(TAG, "Starting processing thread");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Starting processing thread");
         mStopThread = false;
         mThread = new Thread(new CameraWorker());
         mThread.start();
@@ -330,14 +338,14 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
         /* 1. We need to stop thread which updating the frames
          * 2. Stop camera and release it
          */
-        Log.d(TAG, "Disconnecting from camera");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Disconnecting from camera");
         try {
             mStopThread = true;
-            Log.d(TAG, "Notify thread");
+            Log.d(EVIACAM.TAG+"->"+TAG, "Notify thread");
             synchronized (this) {
                 this.notify();
             }
-            Log.d(TAG, "Waiting for thread");
+            Log.d(EVIACAM.TAG+"->"+TAG, "Waiting for thread");
             if (mThread != null)
                 mThread.join();
         } catch (InterruptedException e) {
@@ -435,7 +443,7 @@ public class MyJavaCameraView extends MyCameraBridgeViewBase implements PreviewC
                         deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
                 }
             } while (!mStopThread);
-            Log.d(TAG, "Finish processing thread");
+            Log.d(EVIACAM.TAG+"->"+TAG, "Finish processing thread");
         }
     }
 }

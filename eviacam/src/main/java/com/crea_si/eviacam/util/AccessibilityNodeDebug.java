@@ -132,7 +132,7 @@ public class AccessibilityNodeDebug {
     @SuppressWarnings("unused")
     static
     public void displayFullTree (AccessibilityNodeInfo node) {
-        Log.d(EVIACAM.TAG, "Accessibility tree dump:");
+        Log.d(EVIACAM.TAG+"->AccessibilityNodeDebug", "Accessibility tree dump:");
         
         displayFullTree0(node, "1");
     }
@@ -140,7 +140,7 @@ public class AccessibilityNodeDebug {
     static void displayFullTree0 (AccessibilityNodeInfo node, String prefix) {
         if (node == null) return;
 
-        Log.d(EVIACAM.TAG, prefix + " " + getNodeInfo(node));
+        Log.d(EVIACAM.TAG+"->AccessibilityNodeDebug", prefix + " " + getNodeInfo(node));
         
         // propagate calls to children
         for (int i= 0; i< node.getChildCount(); i++) {

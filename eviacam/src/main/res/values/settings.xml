@@ -38,7 +38,13 @@
     <integer name="motion_threshold_default">1</integer>
     <integer name="motion_threshold_min">0</integer>
     <integer name="motion_threshold_max">5</integer>
-    
+
+    <bool name="enable_dwell_default">true</bool>
+    <integer name="key_click_default">0</integer>
+    <bool name="key_block_default">false</bool>
+    <integer name="external_keypress_time_default">4</integer>
+    <integer name="external_keypress_time_min">1</integer>
+    <integer name="external_keypress_time_max">20</integer>
     <integer name="dwell_time_default">10</integer>
     <integer name="dwell_time_min">1</integer>
     <integer name="dwell_time_max">50</integer>

@@ -31,8 +31,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -40,6 +38,9 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.crea_si.eviacam.BuildConfig;
 import com.crea_si.eviacam.R;
@@ -121,16 +122,16 @@ public class InputMethodAction implements ServiceConnection {
 
         mLastBindAttemptTimeStamp = tstamp;
 
-        if (BuildConfig.DEBUG) Log.d(TAG, "Attempt to bind to remote IME");
+        Log.d(EVIACAM.TAG+"->"+TAG, "Attempt to bind to remote IME");
         Intent intent= new Intent(REMOTE_ACTION);
         intent.setPackage(REMOTE_PACKAGE);
         try {
             if (!mContext.bindService(intent, this, Context.BIND_AUTO_CREATE)) {
-                if (BuildConfig.DEBUG) Log.d(TAG, "Cannot bind remote IME");
+                Log.d(EVIACAM.TAG+"->"+TAG, "Cannot bind remote IME");
             }
         }
         catch(SecurityException e) {
-            Log.e(TAG, "Cannot bind remote IME. Security exception.");
+            Log.e(EVIACAM.TAG+"->"+TAG, "Cannot bind remote IME. Security exception.");
         }
     }
     
@@ -139,7 +140,7 @@ public class InputMethodAction implements ServiceConnection {
         // This is called when the connection with the service has been
         // established, giving us the object we can use to
         // interact with the service.
-        Log.i(TAG, "remoteIME:onServiceConnected: " + className.toString());
+        Log.d(EVIACAM.TAG+"->"+TAG, "remoteIME:onServiceConnected: " + className.toString());
         mRemoteService = IClickableIME.Stub.asInterface(service);
     }
 
@@ -147,7 +148,7 @@ public class InputMethodAction implements ServiceConnection {
     public void onServiceDisconnected(ComponentName className) {
         // This is called when the connection with the service has been
         // unexpectedly disconnected -- that is, its process crashed.
-        Log.i(TAG, "remoteIME:onServiceDisconnected");
+        Log.d(EVIACAM.TAG+"->"+TAG, "remoteIME:onServiceDisconnected");
         mContext.unbindService(this);
         mRemoteService = null;
         keepBindAlive();
@@ -161,7 +162,7 @@ public class InputMethodAction implements ServiceConnection {
     public boolean click(int x, int y) {
         if (mRemoteService == null) {
             if (BuildConfig.DEBUG) {
-                Log.d(TAG, "InputMethodAction: click: no remote service available");
+                Log.d(EVIACAM.TAG+"->"+TAG, "InputMethodAction: click: no remote service available");
             }
             return false;
         }
@@ -234,7 +235,7 @@ public class InputMethodAction implements ServiceConnection {
             mRemoteService.openIME();
         } catch (RemoteException e) {
             // Nothing to be done
-            Log.e(TAG, "InputMethodAction: exception while trying to open IME");
+            Log.e(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to open IME");
         }
     }
 
@@ -245,7 +246,7 @@ public class InputMethodAction implements ServiceConnection {
         if (mRemoteService == null) {
             if (BuildConfig.DEBUG) {
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "InputMethodAction: closeIME: no remote service available");
+                    Log.d(EVIACAM.TAG+"->"+TAG, "InputMethodAction: closeIME: no remote service available");
                 }
             }
             keepBindAlive();
@@ -257,7 +258,7 @@ public class InputMethodAction implements ServiceConnection {
             mRemoteService.closeIME();
         } catch (RemoteException e) {
             // Nothing to be done
-            Log.i(TAG, "InputMethodAction: exception while trying to close IME");
+            Log.d(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to close IME");
         }
     }
 
@@ -291,7 +292,7 @@ public class InputMethodAction implements ServiceConnection {
                             // Do nothing
                         }
                         IClickableIME s= mRemoteService;
-                        //Log.d(TAG, i + ": s= " + s + "selected: " + isCustomKeyboardSelected(mContext));
+                        //Log.d(EVIACAM.TAG+"->"+TAG, i + ": s= " + s + "selected: " + isCustomKeyboardSelected(mContext));
 
                         if (null!= s && isCustomKeyboardSelected(mContext)) {
                             try {
@@ -312,7 +313,7 @@ public class InputMethodAction implements ServiceConnection {
                 mRemoteService.toggleIME();
             } catch (RemoteException e) {
                 // Nothing to be done
-                Log.e(TAG, "InputMethodAction: exception while trying to toggle IME");
+                Log.e(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to toggle IME");
             }
         }
     }
@@ -469,7 +470,7 @@ public class InputMethodAction implements ServiceConnection {
         AlertDialog ad = builder.create();
 
         //noinspection ConstantConditions
-        ad.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         ad.show();
     }
 

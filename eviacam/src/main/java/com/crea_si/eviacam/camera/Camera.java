@@ -20,12 +20,14 @@ package com.crea_si.eviacam.camera;
 
 import android.content.Context;
 import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.Preferences;
 import com.crea_si.eviacam.common.VisionPipeline;
 import com.crea_si.eviacam.util.FlipDirection;
@@ -78,7 +80,7 @@ public class Camera {
             throw new RuntimeException("Cannot initialize OpenCV");
         }
 
-        Log.i(TAG, "OpenCV loaded successfully");
+        Log.d(EVIACAM.TAG+"->"+TAG, "OpenCV loaded successfully");
 
         // initialize JNI part
         System.loadLibrary("visionpipeline");
@@ -91,17 +93,19 @@ public class Camera {
             f.delete();
         }
         catch (IOException e) {
-            Log.e(TAG, "Cannot write haar cascade temp file. Continuing anyway");
+            Log.e(EVIACAM.TAG+"->"+TAG, "Cannot write haar cascade temp file. Continuing anyway");
         }
 
         /*
             Select the best API to access the camera
         */
         if (whichCameraAPI()== CAMERA_API_LEGACY) {
+            Log.d(EVIACAM.TAG+"->"+TAG, "USING old camera api");
             mCameraLegacy = new CameraListener(c, fp, DESIRED_CAPTURE_WIDTH, DESIRED_CAPTURE_HEIGHT);
             mCameraLegacy.setPreviewFlip(mCameraLegacy.getCameraFlip());
         }
         else {
+            Log.d(EVIACAM.TAG+"->"+TAG, "USING camera2 api");
             mCamera2= new Camera2Listener(c, fp);
         }
     }
@@ -133,10 +137,13 @@ public class Camera {
          */
 
         // This device has been reported to work only with camera2 API
-        if (null!= Build.DEVICE && Build.DEVICE.equals("OnePlus3T") && Build.VERSION.SDK_INT>= 24) {
-            return CAMERA_API_2;
-        }
-        return CAMERA_API_LEGACY;
+        //if (null!= Build.DEVICE && Build.DEVICE.equals("OnePlus3T") && Build.VERSION.SDK_INT>= 24) {
+
+        // USE New api default
+        return CAMERA_API_2;
+
+        //}
+        //return CAMERA_API_LEGACY;
     }
 
     /**
@@ -156,7 +163,7 @@ public class Camera {
         // finish JNI part
         VisionPipeline.cleanup();
 
-        Log.d(TAG, "cleanup: completed");
+        Log.d(EVIACAM.TAG+"->"+TAG, "cleanup: completed");
     }
 
     /**
@@ -203,6 +210,7 @@ public class Camera {
      * error, the onCameraError is called.
      */
     public void startCamera() {
+        Log.d(EVIACAM.TAG+"->"+TAG,"startCamera");
         if (null != mCameraLegacy) mCameraLegacy.startCamera();
         else if (null != mCamera2) mCamera2.startCamera();
         else {

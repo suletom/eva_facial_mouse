@@ -81,6 +81,39 @@
     
     <PreferenceCategory android:title="@string/settings_click_settings">
 
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="@bool/enable_dwell_default"
+            android:key="enable_dwell"
+            android:title="@string/settings_enable_dwell" />
+
+        <com.crea_si.eviacam.util.KeyPickerPreference
+            android:defaultValue="@integer/key_click_default"
+            android:key="key_click"
+            android:summary="@string/settings_key_click_summary"
+            android:title="@string/settings_key_click"
+            android:dialogTitle="@string/settings_key_click_dialog"
+
+            />
+
+        <CheckBoxPreference
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:defaultValue="@bool/key_block_default"
+            android:key="key_block"
+            android:title="@string/settings_key_block" />
+
+        <com.crea_si.eviacam.util.NumberPickerPreference
+            android:key="external_keypress_time"
+            android:title="@string/settings_external_keypress_time"
+            android:dialogMessage="@string/settings_external_keypress_time_summary"
+            android:summary="@string/settings_external_keypress_time_summary"
+            android:defaultValue="@integer/external_keypress_time_default"
+            app:minValue="@integer/external_keypress_time_min"
+            app:maxValue="@integer/external_keypress_time_max"
+            />
+
         <com.crea_si.eviacam.util.NumberPickerPreference
             android:key="dwell_time"
             android:title="@string/settings_dwell_time"

@@ -93,10 +93,10 @@ public class ViewUtils {
         
         
         if (v.getId() == View.NO_ID) {
-            Log.d(EVIACAM.TAG, "Processing NO_ID View: " + v.toString());
+            Log.d(EVIACAM.TAG+"->ViewUtils", "Processing NO_ID View: " + v.toString());
         }
         else {
-            Log.d(EVIACAM.TAG, "Processing (id:" + v.getId() + ") " + v.toString());
+            Log.d(EVIACAM.TAG+"->ViewUtils", "Processing (id:" + v.getId() + ") " + v.toString());
         }
         
         if (!(v instanceof ViewGroup)) return; 

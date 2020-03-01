@@ -44,6 +44,14 @@
     <string name="settings_after_one_minute">after 1 minute</string>
     <string name="settings_after_two_minutes">after 2 minutes</string>
     <string name="settings_after_five_minutes">after 5 minutes</string>
+    <string name="settings_enable_dwell">Enable Dwell click</string>
+    <string name="settings_key_click">Click by hardware key event</string>
+    <string name="settings_key_click_summary">Use a keyboard, gamepad, etc. to perform click.</string>
+    <string name="settings_key_click_dialog">Just press a key on your external device</string>
+    <string name="settings_key_click_dialog_text">Please note: Not all key events can be captured.</string>
+    <string name="settings_key_click_dialog_btntext">Disable</string>
+    <string name="settings_key_click_dialog_got">Captured keycode:</string>
+    <string name="settings_key_block">Block the selected click key event</string>
     <string name="settings_dwell_area">Dwell area</string>
     <string name="settings_dwell_area_summary">Maximum displacement before restarting the dwell time</string>
     <string name="settings_dwell_time">Dwell time</string>
@@ -74,7 +82,7 @@
     <string name="settings_advanced">Advanced</string>
     <string name="settings_use_camera2_api">Use camera2 API</string>
     <string name="settings_use_camera2_api_auto">Auto</string>
-    <string name="settings_use_camera2_api_yes">Yes (experimental)</string>
+    <string name="settings_use_camera2_api_yes">Yes</string>
     <string name="settings_use_camera2_api_no">No</string>
     <string name="settings_lock_speed_settings">Lock speed settings</string>
     <!-- Settings screen end -->
@@ -103,6 +111,9 @@
     <string name="dock_softkeyboard_button">Open keyboard</string>
     <string name="dock_toggle_context_menu">Toggle pointer Context Menu</string>
     <string name="dock_toggle_rest_mode">Toggle Rest mode. To disable automatic clicks while you read or watch a video, for instance.</string>
+    <string name="dock_swipe_button">Swipe</string>
+    <string name="dock_zoom_button">Zoom in</string>
+    <string name="dock_zoomo_button">Zoom Out</string>
     <!-- the docking panel end -->
 
     <!-- notification start -->
@@ -240,6 +251,9 @@
     <string name="service_toast_context_menu_disabled">Context Menu disabled</string>
     <string name="service_toast_rest_mode_enabled">Rest Mode enabled</string>
     <string name="service_toast_rest_mode_disabled">Rest Mode disabled</string>
+    <string name="service_toast_dwell_click_turned_on">Auto click turned on!</string>
+
+
     <!-- Service toast end -->
 
     <!-- Service camera start -->
@@ -262,5 +276,18 @@
     <string name="camera_no_longer_available">The camera device is no longer available</string>
     <string name="max_cameras_in_use">Max cameras in use</string>
     <!-- assorted start -->
+
+    <string name="swipe_on">Swipe on</string>
+    <string name="zoom_plus_on">Zoom (+) on</string>
+    <string name="zoom_minus_on">Zoom (-) on</string>
+
+    <string name="fullscreen_activity">EVA Camrea lost info</string>
+    <string name="fullscreen_activity_info">EVA tries to get back access to the lost camera device. This window has been opened to force the running top app to background. (Note: This function is experimental.)\n\nPLEASE DO NOT CLOSE THIS WINDOW! FIRST WAIT FOR THE MOUSE TO COME BACK, THEN USE THE TASK MANAGER TO CLOSE THE APP THAT USES CAMERA.</string>
+    <string name="close_fullscreen">Close</string>
+
+    <string name="settings_external_keypress_time">Keypress time (0.1 sec)</string>
+    <string name="settings_external_keypress_time_summary">Keypress short click time, longer press used az long click</string>
+
+
 
 </resources>

@@ -23,25 +23,30 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.api.IDockPanelEventListener;
 import com.crea_si.eviacam.api.IGamepadEventListener;
 import com.crea_si.eviacam.api.IMouseEventListener;
-import com.crea_si.eviacam.api.IDockPanelEventListener;
 import com.crea_si.eviacam.api.SlaveMode;
-import com.crea_si.eviacam.common.DockPanelLayerView;
-import com.crea_si.eviacam.common.MouseEmulationCallbacks;
 import com.crea_si.eviacam.common.CoreEngine;
+import com.crea_si.eviacam.common.DockPanelLayerView;
 import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.MotionProcessor;
 import com.crea_si.eviacam.common.MouseEmulation;
+import com.crea_si.eviacam.common.MouseEmulationCallbacks;
+import com.crea_si.eviacam.common.RunnableNamed;
+import com.crea_si.eviacam.common.RunnableNamedImpl;
+
 
 public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, MouseEmulationCallbacks {
+    private static final String TAG = "SlaveModeEngineImpl";
     // slave mode operation mode
     private int mSlaveOperationMode= SlaveMode.GAMEPAD_ABSOLUTE;
 
@@ -115,10 +120,15 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
 
     @Override
     public void setSlaveOperationMode(final int mode) {
-        Runnable request = new Runnable() {
+        RunnableNamed request = new RunnableNamedImpl() {
             @Override
             public void run() {
                 doSetSlaveOperationMode(mode);
+            }
+
+            @Override
+            public String getName() {
+                return "setSlaveOperationMode";
             }
         };
         processRequest(request);
@@ -277,7 +287,7 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
         }
         catch (RemoteException e) {
             // Just log it and go on
-            Log.e(EVIACAM.TAG, "RemoteException while sending mouse event");
+            Log.e(EVIACAM.TAG+"->"+TAG, "RemoteException while sending mouse event");
         }
         mLastPos.set(pos.x, pos.y);
         mLastClicked= clicked;
@@ -303,6 +313,7 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
 
     // Avoid creating a new Point for each onMouseEvent call
     private Point mPointInt= new Point();
+    private Point mPointInt2= new Point();
 
     /**
      * Process mouse pointer events
@@ -311,7 +322,7 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
      * @param click true when click generated
      */
     @Override
-    public void onMouseEvent(@NonNull PointF location, boolean click) {
+    public int onMouseEvent(@NonNull PointF location, boolean click, int extra) {
         mPointInt.x= (int) location.x;
         mPointInt.y= (int) location.y;
 
@@ -320,7 +331,7 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
         if (!click) {
             // No click, send event and finish
             checkAndSendMouseEvents(mPointInt, false);
-            return;
+            return 0;
         }
 
         /* Click on the dock panel? */
@@ -328,14 +339,14 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
         if (idDockPanelAction == View.NO_ID) {
             // No, send regular click event and finish
             checkAndSendMouseEvents(mPointInt, true);
-            return;
+            return 0;
         }
 
         /*
          * Process click on dock menu
          */
         // Process action by the view
-        mDockPanelLayerView.performClick(idDockPanelAction);
+        mDockPanelLayerView.performClick(idDockPanelAction,false);
 
         /* Translate menu entry to option code */
         int option= 0;
@@ -371,6 +382,8 @@ public class SlaveModeEngineImpl extends CoreEngine implements SlaveModeEngine, 
                 // Just ignore exception if any
             }
         }
+
+        return 0;
     }
 
     /**

@@ -19,8 +19,9 @@
 
 package com.crea_si.eviacam.a11yservice;
 
-import androidx.annotation.NonNull;
 import android.view.accessibility.AccessibilityEvent;
+
+import androidx.annotation.NonNull;
 
 import com.crea_si.eviacam.common.Engine;
 
@@ -51,6 +52,7 @@ public interface AccessibilityServiceModeEngine extends Engine {
      */
     void enableScrollButtons();
     void disableScrollButtons();
+
 
     /**
      * Enable all above elements

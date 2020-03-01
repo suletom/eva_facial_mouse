@@ -19,6 +19,7 @@
 package com.crea_si.eviacam.common;
 
 import android.graphics.PointF;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -31,8 +32,10 @@ public interface MouseEmulationCallbacks {
      * Called each time a mouse event is generated, either motion event and/or click event
      * @param location location of the pointer is screen coordinates
      * @param click true when click generated
+     * @param extra additional parameter to pass events from (keycodes) to achive for example "click and hold to swipe"
+     * @return return status to pass back information about onging complex events like swipe or zoom (used to render some indicator for the user)
      */
-    void onMouseEvent(@NonNull PointF location, boolean click);
+    int onMouseEvent(@NonNull PointF location, boolean click, int extra);
 
     /**
      * Called to ask whether a certain location of the screen is clickable.

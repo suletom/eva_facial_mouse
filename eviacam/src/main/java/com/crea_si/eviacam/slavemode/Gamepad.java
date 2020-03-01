@@ -18,22 +18,25 @@
  */
 package com.crea_si.eviacam.slavemode;
 
-import com.crea_si.eviacam.common.EVIACAM;
+import android.content.Context;
+import android.graphics.PointF;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+
 import com.crea_si.eviacam.api.GamepadButtons;
 import com.crea_si.eviacam.api.IGamepadEventListener;
 import com.crea_si.eviacam.api.SlaveMode;
+import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.MotionProcessor;
 import com.crea_si.eviacam.common.OverlayView;
 import com.crea_si.eviacam.common.PointerLayerView;
 
-import android.content.Context;
-import android.graphics.PointF;
-import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import android.util.Log;
-import android.view.View;
-
 public class Gamepad implements MotionProcessor {
+
+    private static final String TAG = "Gamepad";
     // time in ms after which the direction highlight is switched off
     private static final int TIME_OFF_MS= 100;
 
@@ -201,7 +204,7 @@ public class Gamepad implements MotionProcessor {
                 }
                 catch (RemoteException e) {
                     // Just log it and go on
-                    Log.e(EVIACAM.TAG, "RemoteException while sending gamepad event");
+                    Log.e(EVIACAM.TAG+"->"+TAG, "RemoteException while sending gamepad event");
                 }
             }
             mLastPressedButton= button;

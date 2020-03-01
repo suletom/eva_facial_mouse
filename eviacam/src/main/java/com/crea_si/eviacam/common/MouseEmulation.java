@@ -18,17 +18,28 @@
  */
 package com.crea_si.eviacam.common;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.PointF;
-import androidx.annotation.NonNull;
+import android.view.KeyEvent;
 import android.view.View;
 
-public class MouseEmulation implements MotionProcessor {
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+public class MouseEmulation implements MotionProcessor, OnSharedPreferenceChangeListener {
     /*
      * states of the engine
      */
     private static final int STATE_STOPPED= 0;
     private static final int STATE_RUNNING= 1;
+
+    public static final int EMULATE_MOUSE_HWCLICK=1;
+    public static final int EMULATE_MOUSE_SWIPE=2;
 
     // click manager
     private final MouseEmulationCallbacks mMouseEmulationCallbacks;
@@ -51,6 +62,18 @@ public class MouseEmulation implements MotionProcessor {
     // click enabled?
     private volatile boolean mClickEnabled= true;
 
+    //last keycode to provide click
+    private volatile int mKeyCode = 0;
+
+    //keypress time
+    private volatile Long mKeyPressTime;
+
+    //initiate click by key
+    private volatile boolean forceClick = false;
+
+    //pass extra event info: like "press and hold"
+    int forceExtraEvent = 0;
+
     // resting mode
     private volatile boolean mRestingModeEnabled= false;
     public void setRestMode(boolean enabled) { mRestingModeEnabled= enabled; }
@@ -70,11 +93,38 @@ public class MouseEmulation implements MotionProcessor {
         mPointerLayer= new PointerLayerView(c);
         ov.addFullScreenLayer(mPointerLayer);
 
+        LocalBroadcastManager.getInstance(mPointerLayer.getContext()).registerReceiver(
+                mMessageReceiver, new IntentFilter("KeyEvent"));
+
         /*
          * control stuff
          */
         mPointerControl= new PointerControl(mPointerLayer, om);
         mDwellClick= new DwellClick(c);
+
+        // register preference change listener
+        Preferences.get().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+        //SharedPreferences sp=  Preferences.get().getSharedPreferences();
+        // get values from shared resources
+        //Boolean enableclick= sp.getBoolean(Preferences.KEY_ENABLE_DWELL,false);
+
+        //if (enableclick)  { enableClick(); }
+        //else disableClick();
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                          String key) {
+        //if (key.equals(Preferences.KEY_ENABLE_DWELL) ) {
+          //  SharedPreferences sp=  Preferences.get().getSharedPreferences();
+            // get values from shared resources
+            //Boolean enableclick= sp.getBoolean(Preferences.KEY_ENABLE_DWELL,false);
+
+            //if (enableclick)  { enableClick(); }
+            //else disableClick();
+        //}
     }
 
     /**
@@ -105,11 +155,20 @@ public class MouseEmulation implements MotionProcessor {
      */
     public void enableClick() {
         if (!mClickEnabled) {
-            mDwellClick.reset();
+            if (mDwellClick!=null){
+                mDwellClick.reset();
+            }
+                //SharedPreferences sp=  Preferences.get().getSharedPreferences();
+                // get values from shared resources
+                //Boolean enableclick= sp.getBoolean(Preferences.KEY_ENABLE_DWELL,false);
 
-            mClickEnabled= true;
+                //if (enableclick) {
+                    mClickEnabled = true;
+                //}
+
         }
     }
+
 
     /**
      * Disable the pointer function
@@ -161,6 +220,47 @@ public class MouseEmulation implements MotionProcessor {
         }
     }
 
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int kc = intent.getIntExtra("keycode",0);
+            int ka = intent.getIntExtra("keyaction",0);
+
+            SharedPreferences sp =  Preferences.get().getSharedPreferences();
+            // get values from shared resources
+            int storedKey = sp.getInt(Preferences.KEY_KEY_CLICK,0);
+
+            if (kc==storedKey) {
+
+                if (ka == KeyEvent.ACTION_DOWN) {
+                    if (mKeyCode == 0) {
+                        mKeyCode = kc;
+                        mKeyPressTime = System.currentTimeMillis();
+                    }
+                }
+                if (ka == KeyEvent.ACTION_UP) {
+                    if (mKeyCode == kc) {
+
+                        Long currTime = System.currentTimeMillis();
+                        Long elapsedTime = currTime - mKeyPressTime;
+
+                        //Log.d("elapse:","el:"+String.valueOf(elapsedTime));
+                        if (elapsedTime<(Preferences.get().getKeypressTime()*100)){
+                            forceClick=true;
+                            forceExtraEvent=EMULATE_MOUSE_HWCLICK;
+
+                        }else{
+                            forceClick=true;
+                            forceExtraEvent=EMULATE_MOUSE_SWIPE;
+                        }
+                        mKeyCode = 0;
+                    }
+                }
+            }
+        }
+    };
+
     /**
      * Process incoming motion
      *
@@ -178,6 +278,8 @@ public class MouseEmulation implements MotionProcessor {
         // get new pointer location
         PointF pointerLocation= mPointerControl.getPointerLocation();
 
+
+
         /* check if click generated */
         boolean clickGenerated= false;
         if (mClickEnabled && mMouseEmulationCallbacks.isClickable(pointerLocation)) {
@@ -185,6 +287,14 @@ public class MouseEmulation implements MotionProcessor {
         }
         else {
             mDwellClick.reset();
+        }
+
+        if (!clickGenerated){
+            //check if click was initiated caused by a key event
+            if (forceClick) {
+                forceClick=false;
+                clickGenerated=true;
+            }
         }
         
         // update pointer position and click progress
@@ -201,9 +311,13 @@ public class MouseEmulation implements MotionProcessor {
             mPointerLayer.updateClickProgress(0);
         }
 
+
+
         // make sure visible changes are updated
         mPointerLayer.postInvalidate();
 
-        mMouseEmulationCallbacks.onMouseEvent(pointerLocation, clickGenerated);
+        int type = mMouseEmulationCallbacks.onMouseEvent(pointerLocation, clickGenerated, forceExtraEvent);
+        forceExtraEvent=0;
+        mPointerLayer.updateIndicator(type);
     }
 }

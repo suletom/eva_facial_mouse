@@ -158,6 +158,7 @@ public class CameraLayerView extends RelativeLayout {
         lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
         v.setLayoutParams(lp);
 
+
         this.addView(v);
     }
 

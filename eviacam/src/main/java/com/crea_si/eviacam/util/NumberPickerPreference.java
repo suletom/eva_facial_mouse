@@ -108,6 +108,8 @@ public class NumberPickerPreference extends DialogPreference {
 
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+
+
         if (restorePersistedValue)
             setValue(getPersistedInt(DEFAULT_MIN_VALUE));
         else

@@ -98,7 +98,7 @@ public class MousePreferencesActivity extends Activity {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preference_fragment);
 
-            /*
+            /*s
              * Lock speed settings checkbox
              */
 
@@ -244,4 +244,5 @@ public class MousePreferencesActivity extends Activity {
             setTitle(getResources().getText(R.string.slave_settings_mouse_preferences));
         }
     }
+
 }

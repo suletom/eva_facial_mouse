@@ -65,7 +65,7 @@ android {
 
     defaultConfig {
         applicationId "com.crea_si.eviacam.service"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 29
 
         versionCode getVersionCode()
@@ -77,7 +77,7 @@ android {
     }
 
 
-    def ndkProjectPath="src/main"
+    def ndkProjectPath="${rootProject.projectDir}/eviacam/src/main"
 
     // File: local.properties should have something like this:
 
@@ -94,6 +94,16 @@ android {
         } else {
             ndkCmd = 'ndk-build'
         }
+
+        def OPENCV_ANDROID_SDK = '/home/kata/andriodapp/OpenCV-android-sdk_2.4.13.6/'
+
+        if (!file(OPENCV_ANDROID_SDK).exists()){
+
+            throw new GradleException('Please set "OPENCV_ANDROID_SDK" variable in eviacam build gradle file to point to the downloaded OpenCV-android-sdk_2.4.13.6!')
+        }
+
+        environment "OPENCV_ANDROID_SDK",OPENCV_ANDROID_SDK
+
         commandLine "${ndkDir}/${ndkCmd}",
                 "NDK_PROJECT_PATH=${ndkProjectPath}",
                 "APP_BUILD_SCRIPT=${ndkProjectPath}/jni/Android.mk",

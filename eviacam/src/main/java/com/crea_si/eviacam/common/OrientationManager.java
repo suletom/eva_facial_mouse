@@ -21,9 +21,10 @@ package com.crea_si.eviacam.common;
 
 import android.content.Context;
 import android.graphics.PointF;
-import androidx.annotation.NonNull;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
 
 import com.crea_si.eviacam.util.FlipDirection;
 import com.crea_si.eviacam.util.PhysicalOrientation;
@@ -40,6 +41,7 @@ class OrientationManager {
 
     // The physical orientation of the camera (depends on hardware)
     private final int mCameraOrientation;
+
 
     // Receive notifications from the SensorManager and keep updated the physical
     // orientation of the device (which is different from the screen orientation)
@@ -58,7 +60,7 @@ class OrientationManager {
         mPhysicalOrientation.enable();
     }
 
-    public void cleanup() {
+       public void cleanup() {
         if (mPhysicalOrientation!= null) {
             mPhysicalOrientation.disable();
             mPhysicalOrientation = null;

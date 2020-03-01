@@ -33,16 +33,21 @@ import android.view.OrientationEventListener;
  * when it is upside down, and 270 degrees when its right side is to the top.
  */
 public class PhysicalOrientation extends OrientationEventListener {
+
+    private static final String TAG = "PhysicalOrientation";
     private int mCurrentOrientation = 0;
-    
+
+
     public PhysicalOrientation(Context context) {
         super(context, SensorManager.SENSOR_DELAY_NORMAL);
     }
-    
+
+
+
     /**
      * It translates from a range from 0 to 359 degrees, to a four main orientation
      * values
-     * 
+     *
      * See: http://www.androidzeitgeist.com/2013/01/fixing-rotation-camera-picture.html
      */
     static private int normalize (int degrees) {
@@ -53,16 +58,19 @@ public class PhysicalOrientation extends OrientationEventListener {
 
         throw new RuntimeException("Abnormal orientation reported");
     }
-   
+
     /**
-     * callback 
-     * 
+     * callback
+     *
      * with SensorManager.SENSOR_DELAY_NORMAL the period is ~60ms
      */
     @Override
     public void onOrientationChanged(int orientation) {
         if (orientation != ORIENTATION_UNKNOWN) {
+
+
             mCurrentOrientation= normalize(orientation);
+
         }
     }
 
@@ -70,3 +78,4 @@ public class PhysicalOrientation extends OrientationEventListener {
         return mCurrentOrientation;
     }
 }
+

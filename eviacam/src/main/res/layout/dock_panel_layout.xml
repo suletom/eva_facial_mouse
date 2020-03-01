@@ -95,4 +95,34 @@
         android:scaleType="fitCenter"
         android:contentDescription="@string/dock_toggle_rest_mode" />
 
+    <ImageButton
+        android:id="@+id/swipe_button"
+        android:layout_width="match_parent"
+        android:layout_height="35dip"
+        android:background="@color/transparent"
+        android:contentDescription="@string/dock_swipe_button"
+        android:padding="2dip"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_swipe" />
+
+    <ImageButton
+        android:id="@+id/zoom_button"
+        android:layout_width="match_parent"
+        android:layout_height="35dip"
+        android:background="@color/transparent"
+        android:contentDescription="@string/dock_zoom_button"
+        android:padding="2dip"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_zoom" />
+
+    <ImageButton
+        android:id="@+id/zoomo_button"
+        android:layout_width="match_parent"
+        android:layout_height="35dip"
+        android:background="@color/transparent"
+        android:contentDescription="@string/dock_zoomo_button"
+        android:padding="2dip"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_zoomo" />
+
 </LinearLayout>

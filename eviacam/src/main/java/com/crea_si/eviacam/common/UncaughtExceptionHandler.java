@@ -20,9 +20,10 @@
 package com.crea_si.eviacam.common;
 
 import android.content.Context;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 /**
  * Manage uncaught exceptions
@@ -51,7 +52,7 @@ class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
         if (defaultExceptionHandler!= null &&
             defaultExceptionHandler.getClass().isAssignableFrom(UncaughtExceptionHandler.class)) {
             // Already installed
-            Log.i(EVIACAM.TAG, "UncaughtExceptionHandler already installed. Ignore request");
+            Log.d(EVIACAM.TAG, "UncaughtExceptionHandler already installed. Ignore request");
             mDefaultExceptionHandler= null;
         }
         else {
@@ -63,7 +64,7 @@ class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(@Nullable Thread thread, @NonNull Throwable ex) {
         Class<?> cls= ex.getClass();
-        Log.i(EVIACAM.TAG, "Uncaught exception:" + cls.getName());
+        Log.d(EVIACAM.TAG, "Uncaught exception:" + cls.getName());
 
         /* Suppress spurious IllegalArgumentException at
            android.view.Surface.nativeUnlockCanvasAndPost */
@@ -80,7 +81,7 @@ class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
             }
 
             if (className!= null && className.equals("android.view.Surface")) {
-                Log.i(EVIACAM.TAG, "Uncaught exception filtered");
+                Log.d(EVIACAM.TAG, "Uncaught exception filtered");
                 endApplication();
                 return;
             }

@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import com.crea_si.eviacam.R;
+import com.crea_si.eviacam.common.EVIACAM;
 
 /**
  * Basic implementation of LoaderCallbackInterface.
@@ -33,7 +34,7 @@ public abstract class MyBaseLoaderCallback implements LoaderCallbackInterface {
             /** OpenCV loader can not start Google Play Market. **/
             case LoaderCallbackInterface.MARKET_ERROR:
             {
-                Log.e(TAG, "Package installation failed!");
+                Log.e(EVIACAM.TAG+"->"+TAG, "Package installation failed!");
                 AlertDialog MarketErrorMessage = new AlertDialog.Builder(mAppContext).create();
                 MarketErrorMessage.setTitle("OpenCV Manager");
                 MarketErrorMessage.setMessage(res.getText(R.string.opencv_package_installation_failed));
@@ -50,13 +51,13 @@ public abstract class MyBaseLoaderCallback implements LoaderCallbackInterface {
             /** Package installation has been canceled. **/
             case LoaderCallbackInterface.INSTALL_CANCELED:
             {
-                Log.d(TAG, "OpenCV library instalation was canceled by user");
+                Log.d(EVIACAM.TAG+"->"+TAG, "OpenCV library instalation was canceled by user");
                 finish();
             } break;
             /** Application is incompatible with this version of OpenCV Manager. Possibly, a service update is required. **/
             case LoaderCallbackInterface.INCOMPATIBLE_MANAGER_VERSION:
             {
-                Log.d(TAG, "OpenCV Manager Service is uncompatible with this app!");
+                Log.d(EVIACAM.TAG+"->"+TAG, "OpenCV Manager Service is uncompatible with this app!");
                 AlertDialog IncomatibilityMessage = new AlertDialog.Builder(mAppContext).create();
                 IncomatibilityMessage.setTitle("OpenCV Manager");
                 IncomatibilityMessage.setMessage(res.getText(R.string.opencv_incompatible));
@@ -72,7 +73,7 @@ public abstract class MyBaseLoaderCallback implements LoaderCallbackInterface {
             /** Other status, i.e. INIT_FAILED. **/
             default:
             {
-                Log.e(TAG, "OpenCV loading failed!");
+                Log.e(EVIACAM.TAG+"->"+TAG, "OpenCV loading failed!");
                 AlertDialog InitFailedDialog = new AlertDialog.Builder(mAppContext).create();
                 InitFailedDialog.setTitle("OpenCV error");
                 InitFailedDialog.setMessage(res.getText(R.string.opencv_init_error));

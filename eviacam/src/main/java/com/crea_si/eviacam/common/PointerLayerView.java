@@ -60,12 +60,18 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
     
     // bitmap of the (mouse) pointer
     private Bitmap mPointerBitmap;
+
+    private Bitmap mPointerBitmap2;
     
     // progress indicator radius in px
     private float mProgressIndicatorRadius;
     
     // click progress percent so far (0 disables)
     private int mClickProgressPercent= 0;
+
+    private int mIndicator = 0;
+
+    private PointF mLast = new PointF();
     
     public PointerLayerView(Context c) {
         super(c);
@@ -86,7 +92,7 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
         Preferences.get().getSharedPreferences().
             unregisterOnSharedPreferenceChangeListener(this);
     }
-    
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
         if (key.equals(Preferences.KEY_UI_ELEMENTS_SIZE) ||
@@ -99,21 +105,42 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
         float size= Preferences.get().getUIElementsSize();
 
         mAlphaPointer= (255 * Preferences.get().getGamepadTransparency()) / 100;
-        
+
+
+
         // re-scale pointer accordingly
+
         BitmapDrawable bd = (BitmapDrawable)
                 getContext().getResources().getDrawable(R.drawable.pointer);
-        Bitmap origBitmap= bd.getBitmap();
+
+        Bitmap origBitmap = bd.getBitmap();
         origBitmap.setDensity(Bitmap.DENSITY_NONE);
-        
+
         // desired long side in pixels of the pointer for this screen density
-        float longSide= TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 
+        float longSide = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 CURSOR_LONG_SIDE_DIP, getResources().getDisplayMetrics()) * size;
         float scaling = longSide / (float) bd.getIntrinsicHeight();
-        float shortSide= scaling * bd.getIntrinsicWidth();
+        float shortSide = scaling * bd.getIntrinsicWidth();
 
-        mPointerBitmap= Bitmap.createScaledBitmap(origBitmap, (int) shortSide, (int) longSide, true);
+        mPointerBitmap = Bitmap.createScaledBitmap(origBitmap, (int) shortSide, (int) longSide, true);
         mPointerBitmap.setDensity(Bitmap.DENSITY_NONE);
+
+
+        bd = (BitmapDrawable)
+                getContext().getResources().getDrawable(R.drawable.pointers);
+
+        origBitmap = bd.getBitmap();
+        origBitmap.setDensity(Bitmap.DENSITY_NONE);
+
+        // desired long side in pixels of the pointer for this screen density
+        longSide = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                CURSOR_LONG_SIDE_DIP, getResources().getDisplayMetrics()) * size;
+        scaling = longSide / (float) bd.getIntrinsicHeight();
+        shortSide = scaling * bd.getIntrinsicWidth();
+
+        mPointerBitmap2 = Bitmap.createScaledBitmap(origBitmap, (int) shortSide, (int) longSide, true);
+        mPointerBitmap2.setDensity(Bitmap.DENSITY_NONE);
+
         
         // compute radius of progress indicator in px
         mProgressIndicatorRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 
@@ -137,15 +164,51 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
             mPaintBox.setColor(0x80FFFFFF);
             canvas.drawCircle(mPointerLocation.x, mPointerLocation.y, radius, mPaintBox);
         }
-        
+
+
+
         // draw pointer
         mPaintBox.setAlpha(mAlphaPointer);
-        canvas.drawBitmap(mPointerBitmap, mPointerLocation.x, mPointerLocation.y, mPaintBox);
+        canvas.drawBitmap((mIndicator==-1?mPointerBitmap2:mPointerBitmap), mPointerLocation.x, mPointerLocation.y, mPaintBox);
+
+        //draw somthing to show swipe/zoom
+
+        if (mIndicator> 0) {
+
+            float radius = 20;
+
+            mPaintBox.setStyle(Paint.Style.FILL_AND_STROKE);
+            mPaintBox.setColor(0x50FFFFFF);
+            canvas.drawCircle(mPointerLocation.x, mPointerLocation.y, radius, mPaintBox);
+
+            mPaintBox.setStyle(Paint.Style.STROKE);
+            mPaintBox.setColor(0x80FFFFFF);
+            canvas.drawCircle(mPointerLocation.x, mPointerLocation.y, radius, mPaintBox);
+
+            mPaintBox.setStyle(Paint.Style.FILL_AND_STROKE);
+            mPaintBox.setColor(0x50FF0000);
+            canvas.drawCircle(mLast.x, mLast.y, radius, mPaintBox);
+
+            mPaintBox.setStyle(Paint.Style.STROKE);
+            mPaintBox.setColor(0x80FFFFFF);
+            canvas.drawCircle(mLast.x, mLast.y, radius, mPaintBox);
+        }
+
     }
 
     public void updatePosition(PointF p) {
         mPointerLocation.x= p.x;
         mPointerLocation.y= p.y;
+    }
+
+    public void updateIndicator(int i) {
+
+        if (mIndicator<=0) {
+            mLast.x=mPointerLocation.x;
+            mLast.y=mPointerLocation.y;
+        }
+
+        mIndicator = i;
     }
 
     public void updateClickProgress(int percent) {

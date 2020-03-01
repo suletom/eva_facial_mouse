@@ -24,8 +24,10 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewScrolled"
     android:accessibilityFeedbackType="feedbackSpoken"
-    android:accessibilityFlags="flagDefault|flagRequestEnhancedWebAccessibility"
+    android:accessibilityFlags="flagDefault|flagRequestEnhancedWebAccessibility|flagRequestFilterKeyEvents"
     android:description="@string/service_description"
     android:settingsActivity="com.crea_si.eviacam.common.MousePreferencesActivity"
     android:canRetrieveWindowContent="true"
-    android:canRequestEnhancedWebAccessibility="true" />
+    android:canRequestEnhancedWebAccessibility="true"
+    android:canPerformGestures="true"
+    android:canRequestFilterKeyEvents="true" />

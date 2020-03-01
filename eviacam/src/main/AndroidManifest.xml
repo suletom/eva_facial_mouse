@@ -6,10 +6,13 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
 
     <!-- Google Analytics required permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
     <uses-feature android:name="android.hardware.camera" android:required="true"/>
 
@@ -32,8 +35,11 @@
             android:name=".a11yservice.TheAccessibilityService"
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" 
-            android:settingsActivity="com.crea_si.eviacam.service.MousePreferencesActivity" >
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:settingsActivity="com.crea_si.eviacam.service.MousePreferencesActivity"
+            android:configChanges="orientation|screenLayout|screenSize|layoutDirection"
+            >
+
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -49,7 +55,8 @@
             android:label="@string/settings_label"
             android:launchMode="singleTask"
             android:taskAffinity="com.crea_si.eviacam.SettingsAffinity"
-            tools:ignore="ExportedActivity" >
+            tools:ignore="ExportedActivity"
+            android:noHistory = "true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.accessibilityservice.SERVICE_SETTINGS" />
@@ -124,6 +131,15 @@
         <!-- TechInfo activity -->
         <activity android:name=".common.TechInfoActivity"
                   android:exported="false" />
+
+        <activity
+            android:name=".common.FullScreenActivity"
+            android:label="@string/fullscreen_activity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.crea_si.eviacam.SettingsAffinity" >
+        </activity>
+
 
     </application>
 

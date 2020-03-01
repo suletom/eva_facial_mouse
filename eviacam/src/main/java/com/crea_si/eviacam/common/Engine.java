@@ -20,6 +20,7 @@
 package com.crea_si.eviacam.common;
 
 import android.app.Service;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -60,6 +61,12 @@ public interface Engine {
          * @param status 0 if initialization completed successfully
          */
         void onInit(int status);
+
+        /* initiate service stop */
+        void stop();
+
+        /*try start if stopped*/
+        void restart();
     }
 
     /**

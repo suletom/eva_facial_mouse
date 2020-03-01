@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.PointF;
+
 import androidx.annotation.NonNull;
 
 import com.crea_si.eviacam.R;
@@ -76,7 +77,15 @@ class DwellClick implements OnSharedPreferenceChangeListener {
         SharedPreferences sp=  Preferences.get().getSharedPreferences();
         // get values from shared resources
         int dwellTime= sp.getInt(Preferences.KEY_DWELL_TIME, DWELL_TIME_DEFAULT) * 100;
-        mCountdown.setTimeToWait(dwellTime);
+        Boolean enableclick = sp.getBoolean(Preferences.KEY_ENABLE_DWELL, false);
+
+        if (!enableclick) {
+            mCountdown.setTimeToWait(8000);
+            //Log.d(EVIACAM.TAG+"->", "setTimeToWait:100000");
+        }else{
+            //Log.d(EVIACAM.TAG+"->", "setTimeToWait:"+String.valueOf(dwellTime));
+            mCountdown.setTimeToWait(dwellTime);
+        }
         int dwellArea= sp.getInt(Preferences.KEY_DWELL_AREA, DWELL_AREA_DEFAULT);
         mDwellAreaSquared= dwellArea * dwellArea;
         mConsecutiveClicks = sp.getBoolean(
@@ -91,7 +100,7 @@ class DwellClick implements OnSharedPreferenceChangeListener {
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
             String key) {
         if (key.equals(Preferences.KEY_DWELL_TIME) || key.equals(Preferences.KEY_DWELL_AREA) ||
-            key.equals(Preferences.KEY_CONSECUTIVE_CLICKS)) {
+            key.equals(Preferences.KEY_CONSECUTIVE_CLICKS) || key.equals(Preferences.KEY_ENABLE_DWELL)) {
                 updateSettings();
         }
     }

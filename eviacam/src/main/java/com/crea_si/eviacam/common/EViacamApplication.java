@@ -22,11 +22,12 @@ import android.app.Application;
 import android.os.Process;
 import android.util.Log;
 
+import com.crea_si.eviacam.BuildConfig;
+
 import org.acra.ACRA;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
-import com.crea_si.eviacam.BuildConfig;
 /**
  * Customized application class
  */
@@ -58,11 +59,11 @@ public class EViacamApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.i(EVIACAM.TAG, "Application EVA Facial Mouse started");
+        Log.d(EVIACAM.TAG, "Application EVA Facial Mouse started");
 
         if (EVIACAM.isACRAProcess()) {
             /* ACRA crash report process. Nothing else to do */
-            Log.i(EVIACAM.TAG, "ACRA crash report process");
+            Log.d(EVIACAM.TAG, "ACRA crash report process");
             return;
         }
 
@@ -77,7 +78,7 @@ public class EViacamApplication extends Application {
 
         if (EVIACAM.isSoftkeyboardProcess()) {
             /* Softkeyboard started. Nothing else to do */
-            Log.i(EVIACAM.TAG, "Softkeyboard process");
+            Log.d(EVIACAM.TAG, "Softkeyboard process");
             return;
         }
 

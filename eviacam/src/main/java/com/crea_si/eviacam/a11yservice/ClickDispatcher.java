@@ -19,17 +19,19 @@
 package com.crea_si.eviacam.a11yservice;
 
 import android.accessibilityservice.AccessibilityService;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.media.AudioManager;
-import androidx.annotation.NonNull;
+import android.media.MediaPlayer;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.crea_si.eviacam.common.MouseEmulationCallbacks;
+import androidx.annotation.NonNull;
+
+import com.crea_si.eviacam.R;
 import com.crea_si.eviacam.common.DockPanelLayerView;
+import com.crea_si.eviacam.common.MouseEmulation;
+import com.crea_si.eviacam.common.MouseEmulationCallbacks;
 import com.crea_si.eviacam.common.OverlayView;
 import com.crea_si.eviacam.common.Preferences;
 
@@ -39,8 +41,14 @@ import com.crea_si.eviacam.common.Preferences;
 class ClickDispatcher implements MouseEmulationCallbacks,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    public static final int COMPLEX_ACTION_UNSET=0;
+    public static final int COMPLEX_ACTION_PREPARED=-1;
+    public static final int COMPLEX_ACTION_SWIPE=1;
+    public static final int COMPLEX_ACTION_ZOOM=2;
+    public static final int COMPLEX_ACTION_ZOOMO=3;
+
     // audio manager for FX notifications
-    private AudioManager mAudioManager;
+    private MediaPlayer mAudioManager;
 
     // layer for drawing the docking panel
     private DockPanelLayerView mDockPanelView;
@@ -52,7 +60,13 @@ class ClickDispatcher implements MouseEmulationCallbacks,
     private ScrollLayerView mScrollLayerView;
 
     // scroll buttons enabled?
-    private boolean mScrollEnabled= true;
+    private boolean mScrollEnabled = true;
+
+    //flags to indicate ongoing complex events
+    private boolean mAction = false;
+    private boolean mSwipe = false;
+    private boolean mZoom = false;
+    private boolean mZoomo = false;
 
     // layer for drawing the pointer context menus
     private ContextMenuLayerView mContextMenuView;
@@ -64,7 +78,8 @@ class ClickDispatcher implements MouseEmulationCallbacks,
     private AccessibilityAction mAccessibilityAction;
 
     ClickDispatcher(@NonNull AccessibilityService s, @NonNull OverlayView ov) {
-        mAudioManager= (AudioManager) s.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager= MediaPlayer.create(s.getBaseContext(), R.raw.tick);
+
 
         /* dockable menu view */
         mDockPanelView= new DockPanelLayerView(s);
@@ -173,9 +188,12 @@ class ClickDispatcher implements MouseEmulationCallbacks,
 
     private void playSound () {
         if (mSoundOnClick) {
-            mAudioManager.playSoundEffect(AudioManager.FX_KEY_CLICK);
+            mAudioManager.start();
+
+            //Log.d("sound","sound");
         }
     }
+
 
     void enableDockPanel() {
         if (!mDockPanelEnabled) {
@@ -223,6 +241,7 @@ class ClickDispatcher implements MouseEmulationCallbacks,
     // avoid creating an object for each onMouseEvent call
     // Does not need to be volatile as is only accessed from the 2ond thread
     private Point mPointInt= new Point();
+    private Point mPointInt2= new Point();
 
     /**
      * Called each time a mouse event is generated
@@ -233,21 +252,97 @@ class ClickDispatcher implements MouseEmulationCallbacks,
      * NOTE: this method is called from a secondary thread
      */
     @Override
-    public void onMouseEvent(@NonNull PointF location, boolean click) {
+    public int onMouseEvent(@NonNull PointF location, boolean click, int extra) {
         mPointInt.x= (int) location.x;
         mPointInt.y= (int) location.y;
+
+        Boolean simpleaction = true;
+
+        int rv = COMPLEX_ACTION_UNSET;
 
         AccessibilityAction aa= mAccessibilityAction;
         if (aa!= null) {
             // this needs to be called regularly
             aa.refresh();
 
-            // perform action when needed
+            mAction = aa.getAction();
+
             if (click) {
-                aa.performAction(mPointInt);
-                if (mSoundOnClick) playSound ();
+
+                if ((aa.getZoom() || mZoom )) {
+
+                    if (mZoom==false) {
+
+                        mZoom = true;
+                        mPointInt2.x= (int) location.x;
+                        mPointInt2.y= (int) location.y;
+                    }else {
+
+                        aa.performZoom(mPointInt,mPointInt2,true);
+                        mPointInt2= new Point();
+                        mZoom=false;
+                    }
+                    rv = COMPLEX_ACTION_ZOOM;
+                    simpleaction=false;
+                }
+
+                if ((aa.getZoomo() || mZoomo )) {
+
+                    if (mZoomo==false) {
+
+                        mZoomo = true;
+                        mPointInt2.x= (int) location.x;
+                        mPointInt2.y= (int) location.y;
+                    }else {
+
+                        aa.performZoom(mPointInt,mPointInt2,false);
+                        mPointInt2= new Point();
+                        mZoomo=false;
+                    }
+                    rv = 3;
+                    simpleaction=false;
+                }
+
+                if (( (aa.getSwipe() || extra==MouseEmulation.EMULATE_MOUSE_SWIPE ) || mSwipe )) {
+
+                    if (mSwipe == false) {
+
+                        mSwipe = true;
+                        mPointInt2.x = (int) location.x;
+                        mPointInt2.y = (int) location.y;
+                    } else {
+
+                        aa.performSwipe(mPointInt, mPointInt2);
+                        mPointInt2 = new Point();
+                        mSwipe = false;
+                    }
+
+                    rv = COMPLEX_ACTION_SWIPE;
+                    simpleaction=false;
+                }
+
+                // perform action when needed
+                if (simpleaction && click) {
+                    //Log.d("clicks", "clicks");
+                    aa.performAction(mPointInt,extra==MouseEmulation.EMULATE_MOUSE_HWCLICK);
+                    if (mSoundOnClick) playSound();
+
+                }
+
+            }else{
+
+                //between two complex actions
+                if (mSwipe) rv=COMPLEX_ACTION_SWIPE;
+                if (mZoom) rv=COMPLEX_ACTION_ZOOM;
+                if (mZoomo) rv=COMPLEX_ACTION_ZOOMO;
+
             }
+
+            if (rv==COMPLEX_ACTION_UNSET && mAction) rv=COMPLEX_ACTION_PREPARED;
+
         }
+
+        return rv;
     }
 
     /**
