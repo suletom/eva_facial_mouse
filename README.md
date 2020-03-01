@@ -28,7 +28,7 @@ sdk.dir=/home/xxx/Android/Sdk
 - Hungarian translation
 
 # Comment
-My father suffers from a rare disease(GBS). He can move his toe, but noting else. I made these modifications to support his healing.
+My father suffers from a rare disease(GBS). He can move his toe, but nothing else. I made these modifications to support his healing.
 After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
 
 I say thanks to the original author and everybody who helped to make the app better.
