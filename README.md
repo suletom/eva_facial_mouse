@@ -1,24 +1,52 @@
+# Compile
+0. install android studio with git support
+1. clone the repository
+2. download android NDK (android-ndk-r13b) and install SDK (api 28)
+3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 
+4. set android SDK and NDK path in android studio or create local.properties file in the project root like this:
+ndk.dir=/home/xxx/Android/Ndk/android-ndk-r13b
+sdk.dir=/home/xxx/Android/Sdk
+
+5. modify eviacam build.gradle -> set the environment variable "OPENCV_ANDROID_SDK" to point to the downloaded OpenCV-android-sdk_2.4.13.6 directory!
+6. gradle sync then compile
+
+# Fixes:
+- Popup messages ported to new android versions  
+- some camera api 2 blocking problems solved
+- some screen on/off queueing problems fixed
+- Improved handling of device screen rotation
+- Extending overlay over on screen navbar to make it clickable
+
+# New Features:
+- Added an actvity to provide ability to recover from camera error/loss
+- Added swipe and zoom(+/-) functions to the dock bar
+- Key event click (from external hardware) with timing settings and swipe action support
+- Setting to turn off dwell click and ability to turn back
+- Key event click can click on any target not just on actionable elements
+- Key event blocking
+- Sound on click is now independent from system sound effects
+- Hungarian translation
+
+# Comment
+My father suffers from a rare disease(GBS). He can move his toe, but noting else. I made these modifications to support his healing.
+After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
+
+I say thanks to the original author and everybody who helped to make the app better.
+
 # Source
-forked from cmauri/eva_facial_mouse
+originating from cmauri/eva_facial_mouse forked from /space-station/eva_facial_mouse
 EVA Facial Mouse is released under GNU/GPL v3.0
 
-
 # Compile with Following libs
-
 OpenCV-android-sdk_2.4.13.6
-
 space-station/WizarDroid (migrated to androidx)
 
-
-## Requirements
+## Requirements at the moment
 
 * Mobile phone or tablet
-* Android 4.1 (Jelly Bean) or higher
+* Android 7 or higher
 * Front camera
 * Dual-core processor or higher
-
-See the [list of devices tested with EVA](https://docs.google.com/spreadsheets/d/1gxuIKbw92d9USPT_SvM0iCdWjtnVcx7owJAgwM6Za6w/).
-
 
 ## Limitations
 
@@ -31,3 +59,5 @@ Due to pre-existing restrictions of the Android platform, there are currently so
 * Applications such as Maps, Earth and Gallery work with restrictions.
 
 For obvious reasons, EVA has not been tested with all devices available on the market. If you find any issues with your device, please, let us know.
+* tested on: Samsung Galaxy A3 2017 (A.8), Xiaomi Redmi 8A (A.9), Xiaomi Mi A1 (A.9)
+
