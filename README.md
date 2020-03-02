@@ -1,6 +1,6 @@
 # Compile
 0. install android studio with git support
-1. clone the repository
+1. clone the repository (you can use android studio to clone the project)
 2. download android NDK (android-ndk-r13b) and install SDK (api 28)
 3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 
 4. set android SDK and NDK path in android studio or create local.properties file in the project root like this:
@@ -39,7 +39,6 @@ EVA Facial Mouse is released under GNU/GPL v3.0
 
 # Compile with Following libs
 OpenCV-android-sdk_2.4.13.6
-space-station/WizarDroid (migrated to androidx)
 
 ## Requirements at the moment
 
