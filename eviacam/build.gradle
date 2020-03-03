@@ -88,6 +88,12 @@ android {
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
         def ndkDir = properties.getProperty('ndk.dir')
+
+        if (!file(ndkDir).exists()){
+
+            throw new GradleException('Please set NDK path in local.properties or in Android Studio!')
+        }
+
         def ndkCmd = ''
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             ndkCmd = 'ndk-build.cmd'
@@ -95,7 +101,7 @@ android {
             ndkCmd = 'ndk-build'
         }
 
-        def OPENCV_ANDROID_SDK = '/home/kata/andriodapp/OpenCV-android-sdk_2.4.13.6/'
+        def OPENCV_ANDROID_SDK = '/home/suletom/Letöltések/OpenCV-android-sdk_2.4.13.6/'
 
         if (!file(OPENCV_ANDROID_SDK).exists()){
 
