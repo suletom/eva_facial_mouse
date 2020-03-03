@@ -1,8 +1,8 @@
 # Compile
 0. install android studio with git support
 1. clone the repository (you can use android studio to clone the project)
-2. download android NDK (android-ndk-r13b) and install SDK (api 28)
-3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 
+2. download android NDK (android-ndk-r13b [NDK downloads link!](https://developer.android.com/ndk/downloads/older_releases) and install SDK (api 28) 
+3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 [OpenCV SDK downloads link!](https://opencv.org/releases/)
 4. set android SDK and NDK path in android studio or create local.properties file in the project root like this:
 ndk.dir=/home/xxx/Android/Ndk/android-ndk-r13b
 sdk.dir=/home/xxx/Android/Sdk
