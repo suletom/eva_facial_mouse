@@ -8,7 +8,7 @@ ndk.dir=/home/xxx/Android/Ndk/android-ndk-r13b
 sdk.dir=/home/xxx/Android/Sdk
 
 5. modify eviacam build.gradle -> set the environment variable "OPENCV_ANDROID_SDK" to point to the downloaded OpenCV-android-sdk_2.4.13.6 directory!
-6. gradle sync then compile
+6. gradle sync then compile (select eviacam run config)
 
 # Fixes:
 - Popup messages ported to new android versions  
@@ -29,7 +29,7 @@ sdk.dir=/home/xxx/Android/Sdk
 
 # Comment
 My father suffers from a rare disease(GBS). He can move his toe, but nothing else. I made these modifications to support his healing.
-After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
+After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably. Bluetooh controllers are able to turn on device screen (some of them can also sleep and wake up and connect) by pressing a button. 
 
 I say thanks to the original author and everybody who helped to make the app better.
 
