@@ -1,14 +1,14 @@
 # Compile
 0. install android studio with git support
 1. clone the repository (you can use android studio to clone the project)
-2. download android NDK (android-ndk-r13b) and install SDK (api 28)
-3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 
+2. download android NDK (android-ndk-r13b [NDK downloads link!](https://developer.android.com/ndk/downloads/older_releases) and install SDK (api 28) 
+3. download opencv SDK: OpenCV-android-sdk_2.4.13.6 [OpenCV SDK downloads link!](https://opencv.org/releases/)
 4. set android SDK and NDK path in android studio or create local.properties file in the project root like this:
 ndk.dir=/home/xxx/Android/Ndk/android-ndk-r13b
 sdk.dir=/home/xxx/Android/Sdk
 
 5. modify eviacam build.gradle -> set the environment variable "OPENCV_ANDROID_SDK" to point to the downloaded OpenCV-android-sdk_2.4.13.6 directory!
-6. gradle sync then compile (select eviacam run config)
+6. gradle sync then compile
 
 # Fixes:
 - Popup messages ported to new android versions  
@@ -29,7 +29,7 @@ sdk.dir=/home/xxx/Android/Sdk
 
 # Comment
 My father suffers from a rare disease(GBS). He can move his toe, but nothing else. I made these modifications to support his healing.
-After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably. Bluetooh controllers are able to turn on device screen (some of them can also sleep and wake up and connect) by pressing a button. 
+After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
 
 I say thanks to the original author and everybody who helped to make the app better.
 
