@@ -41,6 +41,8 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
 
     // Size of the long side of the pointer for normal size (in DIP)
     private static final float CURSOR_LONG_SIDE_DIP = 30;
+
+    public static final int INDICATOR_CLICK = 1000;
     
     // Radius of the visual progress feedback (in DIP)
     private static final float PROGRESS_INDICATOR_RADIUS_DIP = 30;
@@ -169,11 +171,11 @@ public class PointerLayerView extends View implements OnSharedPreferenceChangeLi
 
         // draw pointer
         mPaintBox.setAlpha(mAlphaPointer);
-        canvas.drawBitmap((mIndicator==-1?mPointerBitmap2:mPointerBitmap), mPointerLocation.x, mPointerLocation.y, mPaintBox);
+        canvas.drawBitmap((mIndicator==-1 || mIndicator==INDICATOR_CLICK?mPointerBitmap2:mPointerBitmap), mPointerLocation.x, mPointerLocation.y, mPaintBox);
 
         //draw somthing to show swipe/zoom
 
-        if (mIndicator> 0) {
+        if (mIndicator > 0 && mIndicator < INDICATOR_CLICK) {
 
             float radius = 20;
 
