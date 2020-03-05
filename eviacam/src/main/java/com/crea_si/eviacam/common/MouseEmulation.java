@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.PointF;
+import android.os.CountDownTimer;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -55,7 +56,9 @@ public class MouseEmulation implements MotionProcessor, OnSharedPreferenceChange
     
     // object which provides the logic for the pointer motion and actions
     private PointerControl mPointerControl;
-    
+
+    private CountDownTimer mTimer;
+
     // dwell clicking function
     private DwellClick mDwellClick;
 
@@ -237,6 +240,36 @@ public class MouseEmulation implements MotionProcessor, OnSharedPreferenceChange
                     if (mKeyCode == 0) {
                         mKeyCode = kc;
                         mKeyPressTime = System.currentTimeMillis();
+
+                        mTimer = new CountDownTimer(Preferences.get().getKeypressTime()*100*3,Preferences.get().getKeypressTime()*100) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                                //if already up, no nothing
+                                if (mKeyCode == 0) {
+                                    return;
+                                }
+
+                                Long currTime = System.currentTimeMillis();
+                                Long elapsedTime = currTime - mKeyPressTime;
+
+                                //if elapsed time > keypresstime -> set swipe action automatic
+                                if (elapsedTime>=(Preferences.get().getKeypressTime()*100)){
+
+                                    forceClick=true;
+                                    forceExtraEvent=EMULATE_MOUSE_SWIPE;
+                                    mKeyCode = 0;
+
+
+                                }
+                            }
+
+                            @Override
+                            public void onFinish() {
+                                mKeyCode = 0;
+                            }
+
+                        }.start();
+
                     }
                 }
                 if (ka == KeyEvent.ACTION_UP) {
@@ -254,7 +287,12 @@ public class MouseEmulation implements MotionProcessor, OnSharedPreferenceChange
                             forceClick=true;
                             forceExtraEvent=EMULATE_MOUSE_SWIPE;
                         }
+                        mTimer.cancel();
+
                         mKeyCode = 0;
+
+
+
                     }
                 }
             }
@@ -318,6 +356,11 @@ public class MouseEmulation implements MotionProcessor, OnSharedPreferenceChange
 
         int type = mMouseEmulationCallbacks.onMouseEvent(pointerLocation, clickGenerated, forceExtraEvent);
         forceExtraEvent=0;
-        mPointerLayer.updateIndicator(type);
+        //if hw key is pressed, indicate it
+        if (mKeyCode!=0) {
+            mPointerLayer.updateIndicator(PointerLayerView.INDICATOR_CLICK);
+        } else {
+            mPointerLayer.updateIndicator(type);
+        }
     }
 }

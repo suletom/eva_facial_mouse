@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">EVA Facial Mouse</string>
     <string name="action_click">Kattintás</string>
     <string name="action_collapse">Összezár</string>
     <string name="action_copy">Másol</string>
@@ -46,7 +45,7 @@
     <string name="notification_stop_confirmation_yes">Igen</string>
     <string name="notification_stopped_click_to_start">Megállítva (kattintással indul)</string>
     <string name="zoom_minus_on">Nagyítás (-)</string>
-    <string name="zoom_plus_on">Nagyítás (+)</string>
+    <string name="zoom_plus_on">EVA Facial Mouse</string>
     <string name="wizard_we_finished">Végeztünk!</string>
     <string name="wizard_settings">Beállítások</string>
     <string name="wizard_skip_wizard">Varázsló kihagyása</string>
@@ -84,7 +83,7 @@
     <string name="settings_key_click">Kattintás hardveres billentyűre</string>
     <string name="settings_key_click_dialog">Csak nyomj meg egy gombot az eszközön</string>
     <string name="settings_key_click_dialog_btntext">Kikapcsolás</string>
-    <string name="settings_key_click_dialog_got">Érzékelt billentyűkód</string>
+    <string name="settings_key_click_dialog_got">Érzékelt billentyűkód:</string>
     <string name="settings_key_click_dialog_text">Figyelem: Nem minden gomb esemény kezelhető!</string>
     <string name="settings_key_click_summary">Használj billentyűzetet, gamepad-et, stb. a kattintáshoz.</string>
     <string name="settings_key_block">Billentyű esemény blokkolása</string>
@@ -191,5 +190,10 @@
     <string name="settings_external_keypress_time">Billentyű kattintás ideje (0.1 mp)</string>
     <string name="settings_external_keypress_time_summary">Billentyű rövid kattintás ideje, hosszabb nyomás hosszú kattintást eredményez</string>
     <string name="service_toast_dwell_click_turned_on">Az auto kattintás aktiválva!</string>
+    <string name="wizard_limitations_summary">Az Android korlátozásai miatt néhány funkció nem működik jelenleg. A kamera nem használható. Néhány eszközön gond lehet a hívás felvétellel. A legtöbb játék kezelése nem megoldható. Bizonyos alkalmazások mint a Google Maps vagy Earth, néhány galéria illetve böngésző is csak limitáltan használható. Sok esetben a navigációs billentyűzeten lévő gombok segíthetnek a görgetésben (lásd alább).</string>
+    <string name="wizard_pointer_speed_summary">Mozgasd a fejet a mutató mozgatásához. Próbáld meg az egész képernyőt elérni. Ha szükséges állíts a sebességeken.</string>
+    <string name="wizard_positioning_summary">Helyezd el az eszközt az arcod elé, a fejed legyen természetes helyzetben kb. 30-50cm-re. A teljes arcodnak látszani kell az előnézetben ahhoz hogy érzékelni lehessen. Ha ez megvan az előnézet kerete piros lesz és egy célkereszt jelzi az arcod közepét.</string>
+    <string name="wizard_pre_click_summary">Ahhoz hogy kattints, állítsd meg a mutatót kívánt helyen. Néhány pillanat múlva automatikus kattintás generálódik. Ha az elem többféle műveletet is támogat, akkor egy helyzetfüggő menü jelenik meg.</string>
+    <string name="wizard_run_wizard_again">A varázsló újra futtatását itt tudod megoldani: Beállítások -> Kisegítő lehetőségek -> EVA -> Beállítások</string>
 
 </resources>
