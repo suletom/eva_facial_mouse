@@ -31,5 +31,6 @@ android {
 dependencies {
     implementation project(':input_method_aidl')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'ch.acra:acra:4.9.2'
+    implementation 'ch.acra:acra-http:5.5.0'
+    implementation 'ch.acra:acra-toast:5.5.0'
 }

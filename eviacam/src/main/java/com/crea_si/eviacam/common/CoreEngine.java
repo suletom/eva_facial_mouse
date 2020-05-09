@@ -236,11 +236,13 @@ public abstract class CoreEngine implements Engine, FrameProcessor,
         /*
          * Create UI stuff: root overlay and camera view
          */
+
         mOverlayView= new OverlayView(mService);
         mOverlayView.setVisibility(View.INVISIBLE);
         
         mCameraLayerView= new CameraLayerView(mService);
         mOverlayView.addFullScreenLayer(mCameraLayerView);
+
 
         /*
          * camera and machine vision stuff

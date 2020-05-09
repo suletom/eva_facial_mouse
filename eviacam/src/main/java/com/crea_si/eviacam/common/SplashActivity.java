@@ -28,6 +28,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -46,6 +48,7 @@ public class SplashActivity extends Activity
     /* Intent filter for termination notification (splash -> service) */
     public static final String FINISHED_INTENT_FILTER = "SplashActivity_finished";
     public static final String KEY_STATUS = "status";
+    public static final String TAG = "SplashActivity";
 
     /* Parameters for the intents of this activity (service -> splash) */
     private static final String IS_SECOND_RUN_PARAM = "isSecondRun";
@@ -73,7 +76,10 @@ public class SplashActivity extends Activity
         super.onCreate(bundle);
         setContentView(R.layout.splash_layout);
 
+        Log.d(EVIACAM.TAG+"->"+TAG, "onCreate: called");
+
         if (isSecondRun()) {
+            Log.d(EVIACAM.TAG+"->"+TAG, "onCreate: secoundrun");
             /* Close this splash after some seconds */
             mHandler.postDelayed(mFinishActivity, SPLASH_DISPLAY_LENGTH);
         }
@@ -81,6 +87,10 @@ public class SplashActivity extends Activity
 
     @Override
     protected void onResume() {
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "onResume: called");
+
+
         super.onResume();
         mIsPaused= false;
         if (!isSecondRun()) {
@@ -90,12 +100,16 @@ public class SplashActivity extends Activity
 
     @Override
     protected void onPause() {
+        Log.d(EVIACAM.TAG+"->"+TAG, "onPause: called");
+
         super.onPause();
         mIsPaused= true;
     }
 
     @Override
     protected void onStop() {
+        Log.d(EVIACAM.TAG+"->"+TAG, "onStop: called");
+
         super.onStop();
         if (isSecondRun()) {
             mHandler.removeCallbacks(mFinishActivity);
@@ -119,12 +133,16 @@ public class SplashActivity extends Activity
      * @param status true when all OK
      */
     private void notifyService (boolean status) {
+        Log.d(EVIACAM.TAG+"->"+TAG, "notifyService: called");
+
         Intent notificationIntent= new Intent(FINISHED_INTENT_FILTER);
         notificationIntent.putExtra(KEY_STATUS, status);
         LocalBroadcastManager.getInstance(this).sendBroadcast(notificationIntent);
     }
 
     private void checkRequisites() {
+        Log.d(EVIACAM.TAG+"->"+TAG, "checkRequisites: called");
+
         if (!Eula.wasAccepted(this)) {
             Eula.acceptEula(this, this);
             return;
@@ -133,6 +151,7 @@ public class SplashActivity extends Activity
         if (checkPermissions()) {
             /* If all permissions granted notify that this activity finished OK */
             notifyService(true);
+
 
             finish();
 
@@ -158,6 +177,9 @@ public class SplashActivity extends Activity
      *         missing and therefore need to wait for the user
      */
     private boolean checkPermissions() {
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "checkPermissions: called");
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             // Nothing to do for versions below API 23
             return true;
@@ -175,6 +197,7 @@ public class SplashActivity extends Activity
         }
 
         // Manage overlay permission
+        /*
         final boolean hasManageOverlayPerm= Settings.canDrawOverlays(this);
 
         if (!hasManageOverlayPerm) {
@@ -182,7 +205,7 @@ public class SplashActivity extends Activity
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, MANAGE_OVERLAY_PERMISSION_REQUEST);
             return false;
-        }
+        }*/
 
         return true;
     }
@@ -195,12 +218,16 @@ public class SplashActivity extends Activity
     @Override
     public void onCancelEula() {
         notifyService(false);
+
         finish();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
                                            @NonNull int[] grantResults) {
+        Log.d(EVIACAM.TAG+"->"+TAG, "onRequestPermissionsResult: called");
+
+
         if (requestCode == CAMERA_PERMISSION_REQUEST) {
             if (grantResults.length== 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 notifyService(false);
@@ -215,6 +242,9 @@ public class SplashActivity extends Activity
     @Override
     @TargetApi(23)
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "onRequestPermissionsResult: called");
+
         if (requestCode== MANAGE_OVERLAY_PERMISSION_REQUEST) {
             if (!Settings.canDrawOverlays(this)) {
                 notifyService(false);

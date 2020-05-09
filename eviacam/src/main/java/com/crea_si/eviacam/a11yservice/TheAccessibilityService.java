@@ -38,7 +38,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.crea_si.eviacam.EngineSelector;
 import com.crea_si.eviacam.R;
-import com.crea_si.eviacam.common.Analytics;
 import com.crea_si.eviacam.common.CrashRegister;
 import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.Engine;
@@ -276,7 +275,7 @@ public class TheAccessibilityService extends AccessibilityService
      * Completes the initialization of the engine
      */
     private void initEnginePhase2() {
-        Analytics.get().trackStartService();
+        //Analytics.get().trackStartService();
 
         Preferences.get().setEngineWasRunning(true);
 
@@ -320,7 +319,7 @@ public class TheAccessibilityService extends AccessibilityService
     private void cleanupEngine() {
         if (null == mEngine) return;
 
-        Analytics.get().trackStopService();
+        //Analytics.get().trackStopService();
 
         if (mEngine!= null) {
             mEngine.cleanup();

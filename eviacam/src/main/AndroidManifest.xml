@@ -3,7 +3,7 @@
     package="com.crea_si.eviacam" >
 
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -25,10 +25,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!-- Google Analytics stuff -->
+        <!-- Google Analytics stuff
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        -->
 
         <!-- Accessibility service -->
         <service

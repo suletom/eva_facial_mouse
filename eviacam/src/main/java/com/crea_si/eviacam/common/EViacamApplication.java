@@ -23,18 +23,19 @@ import android.os.Process;
 import android.util.Log;
 
 import com.crea_si.eviacam.BuildConfig;
+import org.acra.*;
+import org.acra.annotation.*;
+import org.acra.data.StringFormat;
+import org.acra.sender.HttpSender;
 
-import org.acra.ACRA;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
 /**
  * Customized application class
  */
 
 /* Annotation for ACRA */
+/*
 @ReportsCrashes(
-        formUri = "http://eva.crea-si.com/submit.php",
+        AcraHttpSender.uri = "http://hungaroprofil.hu/belso_evaerror.php",
         mode = ReportingInteractionMode.TOAST,
         customReportContent = {
                 ReportField.APP_VERSION_CODE,
@@ -53,6 +54,12 @@ import org.acra.annotation.ReportsCrashes;
         resDialogCommentPrompt = com.crea_si.eviacam.R.string.crash_dialog_comment_prompt,
         resDialogOkToast = com.crea_si.eviacam.R.string.crash_dialog_ok_toast
 )
+*/
+
+@AcraCore(buildConfigClass = BuildConfig.class,
+        reportFormat = StringFormat.JSON)
+@AcraHttpSender(uri = "http://hungaroprofil.hu/belso_evaerror.php",
+        httpMethod = HttpSender.Method.POST)
 
 public class EViacamApplication extends Application {
 
@@ -72,8 +79,10 @@ public class EViacamApplication extends Application {
          * provided by ACRA and after that our own handler. In case of uncaught exception our
          * handler is called first so that it can filter some exceptions.
          */
+        ACRA.DEV_LOGGING = true;
         ACRA.init(this);
         ACRA.getErrorReporter().putCustomData("BUILD_ORIGIN", BuildConfig.BUILD_ORIGIN);
+        Log.d(EVIACAM.TAG, "ACRA handler init");
         UncaughtExceptionHandler.init(this);
 
         if (EVIACAM.isSoftkeyboardProcess()) {
@@ -86,7 +95,7 @@ public class EViacamApplication extends Application {
          * EVA service regular start up (main process)
          */
 
-        Analytics.init(this);
+        //Analytics.init(this);
 
         // Raise priority to improve responsiveness
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
