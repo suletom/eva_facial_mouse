@@ -36,6 +36,8 @@ sdk.dir=/home/xxx/Android/Sdk
 # Comment
 My father suffers from a rare disease(GBS). He can move his toe, but nothing else. I made these modifications to support his healing.
 After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
+Any keyboard mouse or joystick like this can be used to click and of course it's possible to solder any kind of switch to the buttons of these devices too, so the idea can be reused on disabled people using their legs hands or other parts of their body.
+![Special mouse slipper](https://github.com/suletom/eva_facial_mouse/special_mouse_slipper.jpg)
 
 I say thanks to the original author and everybody who helped to make the app better!
 
