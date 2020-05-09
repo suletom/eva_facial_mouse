@@ -37,7 +37,7 @@ sdk.dir=/home/xxx/Android/Sdk
 My father suffers from a rare disease(GBS). He can move his toe, but nothing else. I made these modifications to support his healing.
 After testing the original app i found dwell click not user friendly, thats why i combined a cheap bluetooth remote controller with a massive slipper and made a device that let's him to click on the screen reliably.
 
-I say thanks to the original author and everybody who helped to make the app better.
+I say thanks to the original author and everybody who helped to make the app better!
 
 # Source
 originating from cmauri/eva_facial_mouse forked from /space-station/eva_facial_mouse
