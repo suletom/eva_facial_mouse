@@ -91,6 +91,7 @@
     <string name="settings_horizontal">Vízszintes</string>
     <string name="settings_horizontal_speed">Vízszintes sebesség</string>
     <string name="settings_enable_dwell">Automata kattintás</string>
+    <string name="settings_enable_dwell_summary">Figyelem: újra bekapcsolás az eszköztár elrejtő gombjával bármikor lehetséges, rámutatással</string>
     <string name="settings_help">Segítség</string>
     <string name="settings_dwell_time">Auto. kattintás ideje</string>
     <string name="settings_dwell_time_summary">Ennyi ideig vár, mielőtt kattintana (tized mp.)</string>
