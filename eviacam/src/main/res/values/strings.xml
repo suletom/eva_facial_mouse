@@ -45,6 +45,7 @@
     <string name="settings_after_two_minutes">after 2 minutes</string>
     <string name="settings_after_five_minutes">after 5 minutes</string>
     <string name="settings_enable_dwell">Enable Dwell click</string>
+    <string name="settings_enable_dwell_summary">Note: Can be reactivated by pointing to the actionbars hide button any time</string>
     <string name="settings_key_click">Click by hardware key event</string>
     <string name="settings_key_click_summary">Use a keyboard, gamepad, etc. to perform click.</string>
     <string name="settings_key_click_dialog">Just press a key on your external device</string>
