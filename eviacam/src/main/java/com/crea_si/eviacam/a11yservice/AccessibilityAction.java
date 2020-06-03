@@ -23,13 +23,16 @@ package com.crea_si.eviacam.a11yservice;
  import android.accessibilityservice.AccessibilityServiceInfo;
  import android.accessibilityservice.GestureDescription;
  import android.annotation.TargetApi;
- import android.app.AlertDialog;
+ import android.content.BroadcastReceiver;
  import android.content.Context;
  import android.content.DialogInterface;
+ import android.content.Intent;
+ import android.content.IntentFilter;
  import android.content.SharedPreferences;
  import android.graphics.Path;
  import android.graphics.Point;
  import android.graphics.Rect;
+ import android.net.Uri;
  import android.os.Build;
  import android.os.Handler;
  import android.util.Log;
@@ -43,8 +46,10 @@ package com.crea_si.eviacam.a11yservice;
 
  import androidx.annotation.NonNull;
  import androidx.annotation.Nullable;
+ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
  import com.crea_si.eviacam.R;
+ import com.crea_si.eviacam.common.AlertDialog;
  import com.crea_si.eviacam.common.DockPanelLayerView;
  import com.crea_si.eviacam.common.EVIACAM;
  import com.crea_si.eviacam.common.InputMethodAction;
@@ -65,6 +70,7 @@ package com.crea_si.eviacam.a11yservice;
 
     // delay after which an accessibility event is processed
     private static final long SCROLLING_SCAN_RUN_DELAY= 700;
+    private static final int ALERT7_UID = 7;
 
     private static final String TAG = "AccessibilityAction";
 
@@ -147,7 +153,31 @@ package com.crea_si.eviacam.a11yservice;
     private boolean mZoom= false;
     private boolean mZoomo= false;
 
-    AccessibilityAction (@NonNull AccessibilityService as, @NonNull ContextMenuLayerView cv,
+     private BroadcastReceiver mAlertReceiver = new BroadcastReceiver() {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+
+             // Get extra data included in the Intent
+             int res = intent.getIntExtra("result",0);
+             int  ch = intent.getIntExtra("checkbox",0);
+             int uid = intent.getIntExtra("uid",0);
+
+             if (uid==ALERT7_UID) {
+                 if (res== com.crea_si.eviacam.common.AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                     mContextMenuHelpOpen= false;
+                     mDockPanelLayerView.stopFlashingContextMenuButton();
+                 }
+                 if (ch== com.crea_si.eviacam.common.AlertDialog.ALERTDIALOG_CHECKBOX){
+                     Preferences.get().setShowContextMenuHelp(false);
+                 }
+             }
+
+
+         }
+     };
+
+
+     AccessibilityAction (@NonNull AccessibilityService as, @NonNull ContextMenuLayerView cv,
                          @NonNull DockPanelLayerView dplv, @NonNull ScrollLayerView slv) {
         mAccessibilityService= as;
         mContextMenuLayerView = cv;
@@ -176,6 +206,9 @@ package com.crea_si.eviacam.a11yservice;
                 mAccessibilityService.setServiceInfo(asi);
             }
         }
+
+        LocalBroadcastManager.getInstance(cv.getContext()).registerReceiver(
+                mAlertReceiver, new IntentFilter("alertdialogreply"));
     }
 
     boolean getSwipe(){
@@ -475,7 +508,7 @@ package com.crea_si.eviacam.a11yservice;
             
             AccessibilityNodeInfo root= null;
             
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 /*
                   According to the documentation [1]: "This method returns only the windows
                   that a sighted user can interact with, as opposed to all windows.".
@@ -527,33 +560,25 @@ package com.crea_si.eviacam.a11yservice;
                   currently active, if the node is already an IME)
                  */
                 if (mInputMethodAction.click(pInt.x, pInt.y)) return;
+            /*
             }
             else {
-                /*
+
                   Manages actions for the IME.
 
                   LIMITATIONS: when a pop up or dialog is covering the IME there is no way to
                   know (at least for API < 21) such circumstance. Therefore, we give preference
                   to the IME. This may lead to situations where the pop up is not accessible.
-                 */
+
                 if (mInputMethodAction.click(pInt.x, pInt.y)) return;
             }
+            */
 
-
+            //external hw click -> do a real click!
             if (Preferences.get().getClickKey()>0){
-                Path clickPath = new Path();
-                clickPath.moveTo(pInt.x, pInt.y);
 
-                GestureDescription.StrokeDescription clickStroke = new GestureDescription.StrokeDescription(clickPath, 0, 50);
+                realClick(pInt);
 
-                GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
-
-                clickBuilder.addStroke(clickStroke);
-
-                GestureDescription gd = clickBuilder.build();
-
-                Boolean b = mAccessibilityService.dispatchGesture(gd,null,null);
-                return;
             }
 
 
@@ -563,7 +588,9 @@ package com.crea_si.eviacam.a11yservice;
             // Finds node under (x, y) and its available actions
             AccessibilityNodeInfo node= findActionable (pInt, FULL_ACTION_MASK, root);
 
-            if (node == null) return;
+            //click instead -> so the most elements(keyboards, games, etc..) will work, others can be accessed through the context menu
+            if (node == null) { realClick(pInt); return; }
+
 
             Log.d(EVIACAM.TAG+"->"+TAG, "Actionable node found: (" + pInt.x + ", " +
                     pInt.y + ")." + AccessibilityNodeDebug.getNodeInfo(node));
@@ -590,13 +617,19 @@ package com.crea_si.eviacam.a11yservice;
                         });
                     }
 
+
                     /* Pick the default action */
+
                     for (ActionLabel al : mActionLabels) {
                         if ((al.action & availableActions)!= 0) {
                             performActionOnNode(node, al.action);
+
                             break;
                         }
                     }
+
+
+
                 }
             }
             else {
@@ -606,6 +639,26 @@ package com.crea_si.eviacam.a11yservice;
         }
     }
 
+    private boolean realClick(@NonNull Point pInt){
+
+        Log.d(EVIACAM.TAG+"->"+TAG, "Doing real click!");
+
+        Path clickPath = new Path();
+        clickPath.moveTo(pInt.x, pInt.y);
+
+        GestureDescription.StrokeDescription clickStroke = new GestureDescription.StrokeDescription(clickPath, 0, 50);
+
+        GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
+
+        clickBuilder.addStroke(clickStroke);
+
+        GestureDescription gd = clickBuilder.build();
+
+        Boolean b = mAccessibilityService.dispatchGesture(gd,null,null);
+
+        return b;
+    }
+
     /**
      * Show the context menu help dialog
      */
@@ -613,6 +666,7 @@ package com.crea_si.eviacam.a11yservice;
         mDockPanelLayerView.startFlashingContextMenuButton();
 
         final Context c= mDockPanelLayerView.getContext();
+        /*
         View checkBoxView = View.inflate(c, R.layout.context_menu_help, null);
         CheckBox checkBox = (CheckBox) checkBoxView.findViewById(R.id.checkbox);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -621,7 +675,9 @@ package com.crea_si.eviacam.a11yservice;
                 Preferences.get().setShowContextMenuHelp(!isChecked);
             }
         });
+        */
 
+        /*
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle(c.getText(R.string.app_name));
         builder.setMessage(c.getText(R.string.service_dialog_context_menu_help_msg));
@@ -639,6 +695,18 @@ package com.crea_si.eviacam.a11yservice;
         //noinspection ConstantConditions
         ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         ad.show();
+        */
+        Intent inte = new Intent("alertdialog");
+        inte.putExtra("uid",ALERT7_UID);
+        inte.putExtra("title",c.getText(R.string.app_name));
+        inte.putExtra("text",c.getText(R.string.service_dialog_context_menu_help_msg));
+
+        inte.putExtra("positivebuttontext",c.getText(android.R.string.ok));
+        inte.putExtra("negativebuttontext","");
+        inte.putExtra("checkboxtext",c.getText(R.string.service_dialog_context_menu_help_dont_remind));
+
+        LocalBroadcastManager.getInstance(c).sendBroadcast(inte);
+
     }
 
     /**

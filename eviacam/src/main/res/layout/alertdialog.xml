@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dialog_rl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:background="@android:drawable/screen_background_light_transparent"
+    >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/dialog_rlb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:background="#fff"
+        android:layout_centerVertical="true"
+        >
+
+        <TextView
+            android:id="@+id/dialog_ti"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EVA"
+            android:padding="20dp"
+            android:textColor="#000"
+            android:textSize="25dp"
+            />
+
+        <TextView
+            android:id="@+id/dialog_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Want to change the text color?"
+            android:padding="20dp"
+            android:textColor="#000"
+            android:textSize="20dp"
+            android:layout_below="@+id/dialog_ti"
+             />
+
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:checked="false"
+            android:layout_below="@id/dialog_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Don't ask again"
+            android:padding="10dp"
+            android:layout_marginLeft="20dp"
+            android:textSize="15dp"/>
+
+        <Button
+            android:id="@+id/dialog_neutral_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_below="@+id/checkbox"
+            android:layout_marginLeft="20dp"/>
+        <Button
+            android:id="@+id/dialog_positive_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yes"
+            android:layout_alignBaseline="@id/dialog_neutral_btn"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"/>
+
+    </RelativeLayout>
+</RelativeLayout>

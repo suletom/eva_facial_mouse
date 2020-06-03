@@ -65,6 +65,7 @@ public class Preferences {
     public static final String KEY_USE_CAMERA2_API= "use_camera2_api";
     private static final String KEY_ENGINE_WAS_RUNNING= "engine_was_running";
     private static final String KEY_SHOW_CONTEXT_MENU_HELP = "display_context_menu_help";
+    private static final String KEY_COMP_MODE = "comp_mode";
 
     /**
      * Gamepad locations
@@ -441,6 +442,15 @@ public class Preferences {
         spe.apply();
     }
 
+    public boolean getCompMode () {
+        return mSharedPreferences.getBoolean(Preferences.KEY_COMP_MODE, true);
+    }
+
+    public void setCompMode (boolean v) {
+        SharedPreferences.Editor spe= mSharedPreferences.edit();
+        spe.putBoolean(Preferences.KEY_COMP_MODE, v);
+        spe.apply();
+    }
 
  }
  

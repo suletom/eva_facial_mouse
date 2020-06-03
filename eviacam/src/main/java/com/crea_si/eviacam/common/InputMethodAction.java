@@ -18,12 +18,14 @@
  */
 package com.crea_si.eviacam.common;
 
-import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -41,6 +43,7 @@ import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.crea_si.eviacam.BuildConfig;
 import com.crea_si.eviacam.R;
@@ -68,6 +71,12 @@ public class InputMethodAction implements ServiceConnection {
 
     // period (in milliseconds) to try to rebind again to the IME
     private static final int BIND_RETRY_PERIOD = 2000;
+
+    private static final int ALERT3_UID = 3;
+    private static final int ALERT4_UID = 4;
+    private static final int ALERT5_UID = 5;
+    private static final int ALERT6_UID = 6;
+    private static final int ALERT7_UID = 11;
     
     private final Context mContext;
 
@@ -79,9 +88,80 @@ public class InputMethodAction implements ServiceConnection {
 
     // show the remainder for GBoard installation? Use AtomicBoolean instead of MutableBoolean
     // because the later is not available since API 21+
-    private AtomicBoolean mShowGBoardInstallationReminder= new AtomicBoolean(true);
+    // change: this flag is used to "show/not remind" for the all the keyboard related suggestions!
+    private static AtomicBoolean mShowGBoardInstallationReminder= new AtomicBoolean(true);
+    //private static AtomicBoolean mCompMode= new AtomicBoolean(false);
+
 
     private final Handler mHandler= new Handler();
+
+    private BroadcastReceiver mAlertReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            // Get extra data included in the Intent
+            int res = intent.getIntExtra("result",0);
+            int  ch = intent.getIntExtra("checkbox",0);
+            int uid = intent.getIntExtra("uid",0);
+
+            if (uid==ALERT3_UID) {
+                if (res== AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                    textViewFocusedSequence2();
+                }
+
+                if (ch== AlertDialog.ALERTDIALOG_CHECKBOX){
+                    mShowGBoardInstallationReminder.set(false);
+                }else{
+                    mShowGBoardInstallationReminder.set(true);
+                }
+
+            }
+            if (uid==ALERT4_UID) {
+                if (res== AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                    displayIMESettings(mContext);
+                }
+
+            }
+            if (uid==ALERT5_UID) {
+                if (res== AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                    String appPackageName= "com.google.android.inputmethod.latin";
+                    try {
+                        Intent intent1= new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("market://details?id=" + appPackageName));
+                        int flags= intent1.getFlags();
+                        flags|= Intent.FLAG_ACTIVITY_NEW_TASK;
+                        intent1.setFlags(flags);
+
+                        mContext.startActivity(intent1);
+                    } catch (android.content.ActivityNotFoundException e) {
+                        Intent intent1= new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://play.google.com/store/apps/details?id=" +
+                                        appPackageName));
+                        int flags= intent1.getFlags();
+                        flags|= Intent.FLAG_ACTIVITY_NEW_TASK;
+                        intent1.setFlags(flags);
+
+                        mContext.startActivity(intent1);
+                    }
+                }
+
+            }
+            if (uid==ALERT6_UID) {
+                if (res== AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                    displayIMESettings(mContext);
+                }
+
+            }
+
+            if (uid==ALERT7_UID) {
+                if (res== AlertDialog.ALERTDIALOG_NEGATIVERESULT){
+                    displayIMEPicker(mContext);
+                }
+
+            }
+
+        }
+    };
 
     /**
      * Constructor
@@ -92,6 +172,10 @@ public class InputMethodAction implements ServiceConnection {
 
         // attempt to bind with IME
         keepBindAlive();
+
+        LocalBroadcastManager.getInstance(c).registerReceiver(
+                mAlertReceiver, new IntentFilter("alertdialogreply"));
+
     }
 
     /**
@@ -197,13 +281,49 @@ public class InputMethodAction implements ServiceConnection {
         c.startActivity(intent);
     }
 
+    public void textViewFocusedSequence2(){
+
+        if (!checkCustomKeyboardEnabled(mContext, mHandler)) return;
+        if (!checkGBoardEnabled(mContext, mHandler, mShowGBoardInstallationReminder)) return;
+
+        boolean rightKeyboardSelected= isCustomKeyboardSelected(mContext);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            rightKeyboardSelected= rightKeyboardSelected || isGBoardSelected(mContext) ||
+                    isVoiceSelected(mContext);
+        }
+
+        if (!rightKeyboardSelected) {
+            displayIMEPicker(mContext);
+        }
+
+        try {
+            mRemoteService.openIME();
+        } catch (RemoteException e) {
+            // Nothing to be done
+            Log.e(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to open IME");
+        }
+
+
+    }
+
     /**
      * Sequence of operations to be executed when a text view is focused
      */
     public void textViewFocusedSequence() {
-        if (!checkCustomKeyboardEnabled(mContext, mHandler)) return;
 
-        if (!checkGBoardEnabled(mContext, mHandler, mShowGBoardInstallationReminder)) return;
+
+        /*textview focus?
+
+        1. vagy EVA vagy Gboard aktiv-e?
+        i: ok
+        n: kérdezünk: Kiválasztod az evat vagy  gboardot?
+            n: -> ha megjegyeztette akkor ennyi többet nem piszkáljuk a munkamenetben
+            i: mindkettőt végigkérdezzük felteszi-e, aztán beállítja-e
+
+        */
+        if (mShowGBoardInstallationReminder.get()==false) {
+            return;
+        }
 
         boolean rightKeyboardSelected= isCustomKeyboardSelected(mContext);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -221,22 +341,11 @@ public class InputMethodAction implements ServiceConnection {
                 msg= mContext.getResources().getString(
                         R.string.service_dialog_eva_keyboard_gboard_not_selected);
             }
-            displayInformationDialog(mContext, mHandler, msg, new Runnable() {
-                @Override
-                public void run() {
-                    displayIMEPicker(mContext);
-                }
-            }, null);
+            displayInformationDialog(ALERT3_UID,mContext, mHandler, msg, null,mShowGBoardInstallationReminder);
 
             return;
         }
 
-        try {
-            mRemoteService.openIME();
-        } catch (RemoteException e) {
-            // Nothing to be done
-            Log.e(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to open IME");
-        }
     }
 
     /**
@@ -266,9 +375,8 @@ public class InputMethodAction implements ServiceConnection {
      * Sequence of actions when keyboard menu option is selected
      */
     public void dockMenuKeyboardSequence() {
-        if (!checkCustomKeyboardEnabled(mContext, mHandler)) return;
 
-        if (!checkGBoardEnabled(mContext, mHandler, mShowGBoardInstallationReminder)) return;
+        checkCustomKeyboardEnabled(mContext, mHandler);
 
         if (!isCustomKeyboardSelected(mContext)) {
             displayIMEPicker(mContext);
@@ -315,7 +423,9 @@ public class InputMethodAction implements ServiceConnection {
                 // Nothing to be done
                 Log.e(EVIACAM.TAG+"->"+TAG, "InputMethodAction: exception while trying to toggle IME");
             }
+
         }
+
     }
 
     /**
@@ -418,27 +528,28 @@ public class InputMethodAction implements ServiceConnection {
         return isKeyboardEnabled(c, GBOARD_IME);
     }
 
-    private static void displayInformationDialog(@NonNull final Context c,
+    private static void displayInformationDialog(int id, @NonNull final Context c,
                                                  @NonNull final Handler h,
                                                  @NonNull final CharSequence msg,
                                                  @NonNull final Runnable r,
                                                  @Nullable final AtomicBoolean showDialog) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            displayInformationDialog0(c, msg, r, showDialog);
+            displayInformationDialog0(id ,c, msg, r, showDialog);
         }
         else {
             h.post(new Runnable() {
                 @Override
                 public void run() {
-                    displayInformationDialog0(c, msg, r, showDialog);
+                    displayInformationDialog0(id, c, msg, r, showDialog);
                 }
             });
         }
     }
 
-    private static void displayInformationDialog0(@NonNull Context c, @NonNull CharSequence msg,
+    private static void displayInformationDialog0(int id, @NonNull Context c, @NonNull CharSequence msg,
                                                   @NonNull final Runnable r,
                                                   @Nullable final AtomicBoolean showDialog) {
+        /*
         View checkBoxView= null;
         if (null != showDialog) {
             checkBoxView = View.inflate(c, R.layout.input_method_action_help, null);
@@ -452,6 +563,8 @@ public class InputMethodAction implements ServiceConnection {
             });
         }
 
+         */
+    /*
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle(c.getText(R.string.app_name));
         builder.setMessage(msg);
@@ -472,6 +585,23 @@ public class InputMethodAction implements ServiceConnection {
         //noinspection ConstantConditions
         ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         ad.show();
+*/
+        Intent inte = new Intent("alertdialog");
+        inte.putExtra("uid",id);
+        inte.putExtra("title",c.getText(R.string.app_name));
+        inte.putExtra("text",msg);
+
+        if (showDialog!=null) {
+            inte.putExtra("checkbox", 1);
+            inte.putExtra("checkboxtext",c.getText(R.string.service_dialog_ime_action_help_dont_remind));
+        }
+
+        inte.putExtra("positivebuttontext",c.getText(android.R.string.ok));
+        inte.putExtra("negativebuttontext",c.getText(R.string.service_dialog_ime_action_help_not_now));
+
+
+        LocalBroadcastManager.getInstance(c).sendBroadcast(inte);
+
     }
 
     /**
@@ -482,11 +612,13 @@ public class InputMethodAction implements ServiceConnection {
      */
     private static boolean checkCustomKeyboardEnabled(@NonNull final Context c,
                                                       @NonNull Handler h) {
+
+
         if (isCustomKeyboardEnabled(c)) {
             return true;
         }
 
-        displayInformationDialog(c, h, c.getResources().getString(
+        displayInformationDialog(ALERT4_UID,c, h, c.getResources().getString(
                 R.string.service_dialog_eva_keyboard_not_enabled),
                 new Runnable() {
                     @Override
@@ -494,6 +626,7 @@ public class InputMethodAction implements ServiceConnection {
                         displayIMESettings(c);
                     }
                 }, null);
+
         return false;
     }
 
@@ -502,8 +635,7 @@ public class InputMethodAction implements ServiceConnection {
      * When not is the case, guides the user to do so.
      *
      * @param c context
-     * @param installCheckBoxState if not null, show the user a checkbox to not show again the message
-     *                      during the rest of the session
+     * @param installCheckBoxState not used
      * @return true if GBoard is installed and enabled or if API < 22 or
      *
      * Remarks: for devices with API below 22 the GBoard keyboard does not respond to
@@ -514,17 +646,15 @@ public class InputMethodAction implements ServiceConnection {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
             return true;
         }
+
+
         /* Device with API 22+ */
 
         boolean gBoardInstalled= isGBoardInstalled(c);
 
-        if (!gBoardInstalled && !mShowGBoardInstallationReminder.get()) {
-            return true;
-        }
-
         if (!gBoardInstalled) {
             /* Not installed */
-            displayInformationDialog(c, h, c.getResources().getString(
+            displayInformationDialog(ALERT5_UID,c, h, c.getResources().getString(
                     R.string.service_dialog_gboard_not_installed), new Runnable() {
                 @Override
                 public void run() {
@@ -548,14 +678,14 @@ public class InputMethodAction implements ServiceConnection {
                         c.startActivity(intent);
                     }
                 }
-            }, installCheckBoxState);
+            }, null);
 
             return false;
         }
 
         if (!isGBoardEnabled(c)) {
             /* Not enabled */
-            displayInformationDialog(c, h, c.getResources().getString(
+            displayInformationDialog(ALERT6_UID,c, h, c.getResources().getString(
                     R.string.service_dialog_gboard_not_enabled),
                     new Runnable() {
                         @Override
@@ -569,14 +699,3 @@ public class InputMethodAction implements ServiceConnection {
         return true;
     }
 }
-
-
-/*
-whenWebView =>
-    if (customKeyboardSelected()) {
-        textViewFocusedSequence(NAVIGATION);
-    }
-    else {
-        InformationDialog(KeyBoardPickerDialog())
-    }
- */

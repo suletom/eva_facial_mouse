@@ -101,7 +101,7 @@ android {
             ndkCmd = 'ndk-build'
         }
 
-        def OPENCV_ANDROID_SDK = '/home/kata/andriodapp/OpenCV-android-sdk_2.4.13.6'
+        def OPENCV_ANDROID_SDK = '/home/suletom/Letöltések/OpenCV-android-sdk_2.4.13.6'
 
         if (!file(OPENCV_ANDROID_SDK).exists()){
 
@@ -170,4 +170,12 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+}
+
+task clearData(type: Exec) {
+    def clearDataCommand = ['adb', 'shell', 'pm', 'clear', 'com.crea_si.eviacam.service']
+    commandLine clearDataCommand
+
+    def clearDataCommand1 = ['adb', 'shell', 'pm', 'uninstall', 'com.crea_si.eviacam.service']
+    commandLine clearDataCommand1
 }

@@ -86,6 +86,7 @@ public abstract class CoreEngine implements Engine, FrameProcessor,
 
     /* root overlay view */
     private OverlayView mOverlayView;
+    private AlertDialog mAlertView;
     protected OverlayView getOverlayView() { return mOverlayView; }
 
     /* the camera viewer */
@@ -237,11 +238,14 @@ public abstract class CoreEngine implements Engine, FrameProcessor,
          * Create UI stuff: root overlay and camera view
          */
 
+        mAlertView = new AlertDialog(mService);
+
         mOverlayView= new OverlayView(mService);
         mOverlayView.setVisibility(View.INVISIBLE);
         
         mCameraLayerView= new CameraLayerView(mService);
         mOverlayView.addFullScreenLayer(mCameraLayerView);
+
 
 
         /*
@@ -666,6 +670,9 @@ public abstract class CoreEngine implements Engine, FrameProcessor,
 
         mOverlayView.cleanup();
         mOverlayView= null;
+
+        mAlertView.cleanup();
+        mAlertView=null;
 
         mPowerManagement.cleanup();
         mPowerManagement = null;

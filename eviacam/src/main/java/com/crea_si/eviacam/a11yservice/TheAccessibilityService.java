@@ -20,7 +20,7 @@
 package com.crea_si.eviacam.a11yservice;
 
 import android.accessibilityservice.AccessibilityService;
-import android.app.AlertDialog;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -42,6 +42,7 @@ import com.crea_si.eviacam.common.CrashRegister;
 import com.crea_si.eviacam.common.EVIACAM;
 import com.crea_si.eviacam.common.Engine;
 import com.crea_si.eviacam.common.Preferences;
+import com.crea_si.eviacam.common.AlertDialog;
 import com.crea_si.eviacam.wizard.WizardUtils;
 
 import org.acra.ACRA;
@@ -55,6 +56,7 @@ public class TheAccessibilityService extends AccessibilityService
     private static final String TAG = "TheAccessibilityService";
 
     private static TheAccessibilityService sTheAccessibilityService;
+    private static final int ALERT_UID = 1;
 
     // reference to the engine
     private AccessibilityServiceModeEngine mEngine;
@@ -75,6 +77,7 @@ public class TheAccessibilityService extends AccessibilityService
 
             if (action == ServiceNotification.NOTIFICATION_ACTION_STOP) {
                 /* Ask for confirmation before stopping */
+                /*
                 AlertDialog ad = new AlertDialog.Builder(c)
                     .setMessage(c.getResources().getString(R.string.notification_stop_confirmation))
                     .setPositiveButton(c.getResources().getString(
@@ -92,6 +95,19 @@ public class TheAccessibilityService extends AccessibilityService
                 //noinspection ConstantConditions
                 ad.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                 ad.show();
+                */
+
+                Log.d(EVIACAM.TAG+"->"+TAG, "alertdialog intent");
+
+                Intent inte = new Intent("alertdialog");
+                inte.putExtra("uid",ALERT_UID);
+                inte.putExtra("text",c.getResources().getString(R.string.notification_stop_confirmation));
+                inte.putExtra("negativebuttontext",c.getResources().getString(R.string.notification_stop_confirmation_no));
+                inte.putExtra("positivebuttontext",c.getResources().getString(R.string.notification_stop_confirmation_yes));
+                inte.putExtra("checkboxtext","");
+
+                LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(inte);
+
             } else if (action == ServiceNotification.NOTIFICATION_ACTION_START) {
                 initEngine();
             } else {
@@ -101,7 +117,37 @@ public class TheAccessibilityService extends AccessibilityService
         }
     };
 
-    @Override
+    private BroadcastReceiver mAlertReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.d(EVIACAM.TAG+"->"+TAG, "mAlertReceiver: Got alertreply intent");
+
+            // Get extra data included in the Intent
+            int res = intent.getIntExtra("result",0);
+            int  ch = intent.getIntExtra("checkbox",0);
+            int uid = intent.getIntExtra("uid",0);
+
+            Log.d(EVIACAM.TAG+"->"+TAG, "mAlertReceiver: Got alertreply intent uid:"+String.valueOf(uid));
+            Log.d(EVIACAM.TAG+"->"+TAG, "mAlertReceiver: Got alertreply intent res:"+String.valueOf(res));
+
+            if (uid==ALERT_UID) {
+                if (res==AlertDialog.ALERTDIALOG_POSITIVERESULT){
+                    Log.d(EVIACAM.TAG+"->"+TAG, "mAlertReceiver: Got alertreply intent stopping!");
+                    cleanupEngine();
+                    Preferences.get().setEngineWasRunning(false);
+
+                }
+            }
+
+        }
+    };
+
+
+
+
+
+        @Override
     public void onConfigurationChanged(Configuration newConfig) {
 
         if (newConfig.orientation==Configuration.ORIENTATION_PORTRAIT) {
@@ -194,6 +240,9 @@ public class TheAccessibilityService extends AccessibilityService
 
         LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
                 mMessageReceiver, new IntentFilter("BlockAllKey"));
+
+        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
+                mAlertReceiver, new IntentFilter("alertdialogreply"));
 
         initEngine();
     }
