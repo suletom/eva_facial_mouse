@@ -146,7 +146,7 @@
         \n4. Válaszd ki \'EVA Billentyűzet\'
     </string>
     <string name="wizard_set_keyboard_lollipop">
-        <![CDATA[1. Open: \'Settings > Language & input > Current Keyboard > CHOOSE KEYBOARDS\']]>
+        <![CDATA[1. Nyisd meg: \'Beállítások > Nyelv és bevitel > Aktuális Billentyűzet > BILLENTYŰZET KIVÁLASZTÁSA\']]>
         \n2. Kapcsold be \'EVA Billentyűzet\'
         \n3. Menj vissza
         \n4. Kattints rá \'Aktuális Billentyűzet\'
@@ -156,7 +156,7 @@
     <string name="wizard_click_scroll_button_to_continue">Kattints az alul jobbra lévő görgetés gombra a folytatáshoz</string>
     <string name="wizard_click_enabled_next">A kövezkező képernyőn a kurzor és a kattintás funkció be lesz kapcsolva</string>
     <string name="wizard_configuration_settings">Konfigurációs beállítások</string>
-    <string name="wizard_configuration_settings_summary">A kurzor sebesség és a többi dolog beállítása később itt található: \\nBeállítások > Kisegítő lehetőségek > EVA Facial Mouse > Beállítások</string>
+    <string name="wizard_configuration_settings_summary">A kurzor sebesség és a többi dolog beállítása később itt található: \nBeállítások > Kisegítő lehetőségek > EVA Facial Mouse > Beállítások</string>
     <string name="wizard_dock_menu">Eszköztár</string>
     <string name="wizard_dock_menu_summary">A kisegítő eszköztár a képernyő bal szélén gyors elérést biztosít sok funkcióhoz</string>
     <string name="wizard_eva_not_running">Az EVA nem fut</string>
