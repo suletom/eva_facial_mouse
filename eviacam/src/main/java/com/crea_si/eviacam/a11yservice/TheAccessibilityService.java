@@ -189,6 +189,30 @@ public class TheAccessibilityService extends AccessibilityService
      * Start the initialization sequence of the accessibility service.
      */
     private void init() {
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getBaseContext());
+
+        try {
+            lbm.unregisterReceiver(mMessageReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.d(EVIACAM.TAG+" ->"+TAG,"mMessageReceiver not registered");
+        }
+
+        try {
+            lbm.unregisterReceiver(mAlertReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.d(EVIACAM.TAG+" ->"+TAG,"mAlertReceiver not registered");
+        }
+
+        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
+                mMessageReceiver, new IntentFilter("BlockAllKey"));
+
+        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
+                mAlertReceiver, new IntentFilter("alertdialogreply"));
+
+        Log.d(EVIACAM.TAG+" -> AlertDialog", "Register Broadcasrecever for stopping dialog etc.");
+
+
         /*
          * Check if service has been already started.
          * Under certain circumstances onUnbind is not called (e.g. running
@@ -238,11 +262,7 @@ public class TheAccessibilityService extends AccessibilityService
             return;
         }
 
-        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
-                mMessageReceiver, new IntentFilter("BlockAllKey"));
 
-        LocalBroadcastManager.getInstance(this.getBaseContext()).registerReceiver(
-                mAlertReceiver, new IntentFilter("alertdialogreply"));
 
         initEngine();
     }
